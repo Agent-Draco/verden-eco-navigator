@@ -22,9 +22,14 @@ const Signup = () => {
     if (password.length < 6) { setError("Password must be at least 6 characters"); return; }
     setLoading(true);
     setError("");
-    await signup(name, email, password);
-    setLoading(false);
-    navigate("/home");
+    try {
+      await signup(name, email, password);
+      navigate("/home");
+    } catch (err: any) {
+      setError(err.message || "An unknown error occurred.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

@@ -1,64 +1,38 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { lazy, Suspense } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AppProvider } from "@/contexts/AppContext";
-import RewardPopup from "@/components/verden/RewardPopup";
-import Splash from "./pages/Splash";
-import Onboarding from "./pages/Onboarding";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import ForgotPassword from "./pages/ForgotPassword";
-import Home from "./pages/Home";
-import RouteComparison from "./pages/RouteComparison";
-import NavigationScreen from "./pages/NavigationScreen";
-import TripSummary from "./pages/TripSummary";
-import Credits from "./pages/Credits";
-import EcoMoov from "./pages/EcoMoov";
-import Wallet from "./pages/Wallet";
-import FuelEfficient from "./pages/FuelEfficient";
-import VehicleSetup from "./pages/VehicleSetup";
-import Profile from "./pages/Profile";
-import Customize from "./pages/Customize";
-import NotFound from "./pages/NotFound";
+import AuthLayout from "@/components/verden/AuthLayout";
 
-const queryClient = new QueryClient();
+const Home = lazy(() => import("@/pages/Home"));
+const Navigation = lazy(() => import("@/pages/Navigation"));
+const TripSummary = lazy(() => import("@/pages/TripSummary"));
+const Profile = lazy(() => import("@/pages/Profile"));
+const Login = lazy(() => import("@/pages/Login"));
+const EcoMoov = lazy(() => import("@/pages/EcoMoov"));
+const EcoMoovGroup = lazy(() => import("@/pages/EcoMoovGroup"));
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AuthProvider>
+const App = () => {
+  return (
+    <Router>
+      <Suspense fallback={<div>Loading...</div>}>
         <AppProvider>
-          <RewardPopup />
-          <BrowserRouter>
+          <AuthProvider>
             <Routes>
-              <Route path="/" element={<Splash />} />
-              <Route path="/onboarding" element={<Onboarding />} />
+              <Route path="/" element={<AuthLayout><Home /></AuthLayout>} />
+              <Route path="/home" element={<AuthLayout><Home /></AuthLayout>} />
+              <Route path="/navigation" element={<AuthLayout><Navigation /></AuthLayout>} />
+              <Route path="/trip-summary" element={<AuthLayout><TripSummary /></AuthLayout>} />
+              <Route path="/profile" element={<AuthLayout><Profile /></AuthLayout>} />
               <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/home" element={<Home />} />
-              <Route path="/compare" element={<RouteComparison />} />
-              <Route path="/navigate" element={<NavigationScreen />} />
-              <Route path="/summary" element={<TripSummary />} />
-              <Route path="/credits" element={<Credits />} />
-              <Route path="/ecomoov" element={<EcoMoov />} />
-              <Route path="/wallet" element={<Wallet />} />
-              <Route path="/fuel-efficient" element={<FuelEfficient />} />
-              <Route path="/vehicle" element={<VehicleSetup />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/customize" element={<Customize />} />
-              <Route path="*" element={<NotFound />} />
+              <Route path="/ecomoov" element={<AuthLayout><EcoMoov /></AuthLayout>} />
+              <Route path="/ecomoov/:id" element={<AuthLayout><EcoMoovGroup /></AuthLayout>} />
             </Routes>
-          </BrowserRouter>
+          </AuthProvider>
         </AppProvider>
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+      </Suspense>
+    </Router>
+  );
+};
 
 export default App;

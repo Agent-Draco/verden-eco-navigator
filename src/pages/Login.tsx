@@ -21,9 +21,14 @@ const Login = () => {
     if (!email.includes("@")) { setError("Please enter a valid email"); return; }
     setLoading(true);
     setError("");
-    await login(email, password);
-    setLoading(false);
-    navigate("/home");
+    try {
+      await login(email, password);
+      navigate("/home");
+    } catch (err: any) {
+      setError(err.message || "An unknown error occurred.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

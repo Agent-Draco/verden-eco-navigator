@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Zap, Leaf, Clock, Navigation2, MapPin } from "lucide-react";
+import { Search, Zap, Leaf, Clock, Navigation2, MapPin, Car, Bike, Bus } from "lucide-react";
 import GlassCard from "@/components/verden/GlassCard";
 import GlassButton from "@/components/verden/GlassButton";
 import Map from "@/components/verden/Map";
@@ -20,17 +20,39 @@ const Home = () => {
   const [fastestRoute, setFastestRoute] = useState(null);
   const [greenestRoute, setGreenestRoute] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
+  const [userHeading, setUserHeading] = useState(0);
+
+  const [transportMode, setTransportMode] = useState<'car' | 'bike' | 'cycle' | 'public'>('car');
+  const [routePreference, setRoutePreference] = useState<'fast' | 'eco'>('fast');
+  const [publicTransportOptions, setPublicTransportOptions] = useState({
+    bus: true,
+    shuttle: true,
+    metro: true,
+    cycle: true,
+  });
 
   const navigate = useNavigate();
-  const { credits, addCredits } = useApp();
+  const { credits, setLastGreenestRoute } = useApp();
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((position) => {
-        const { longitude, latitude } = position.coords;
-        setUserLocation([longitude, latitude]);
-      });
+      const watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          const { latitude, longitude, heading } = position.coords;
+          setUserLocation([latitude, longitude]);
+          if (heading !== null) {
+            setUserHeading(heading);
+          }
+        },
+        () => console.error("Unable to retrieve your location"),
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0,
+        }
+      );
+      return () => navigator.geolocation.clearWatch(watchId);
     }
   }, []);
 
@@ -42,28 +64,49 @@ const Home = () => {
     }
   };
 
+  const calculateCO2 = (distance, duration) => {
+    const distance_km = distance / 1000;
+    const duration_min = duration / 60;
+    if (duration_min === 0) return 0;
+
+    const avgSpeed = distance_km / (duration_min / 60);
+    
+    let stopPenalty = 1;
+    if (avgSpeed < 25) {
+      stopPenalty = 1.25;
+    } else if (avgSpeed <= 40) {
+      stopPenalty = 1.1;
+    }
+
+    const roadEfficiency = 1;
+
+    const co2 = distance_km * 0.12 * stopPenalty * roadEfficiency;
+    return parseFloat(co2.toFixed(1));
+  };
+
   const handleSelect = async (place) => {
     setQuery(place.properties.name);
     setSelectedDest(place);
     setShowSuggestions(false);
+    setFastestRoute(null);
+    setGreenestRoute(null);
 
     if (userLocation) {
-      const route = await getRoute(userLocation, place.geometry.coordinates);
-      const distanceInKm = route.distance / 1000;
-      const durationInMin = Math.round(route.duration / 60);
+      const userCoords: [number, number] = [userLocation[1], userLocation[0]];
+      const destCoords: [number, number] = place.geometry.coordinates;
+      
+      const routes = await getRoute(userCoords, destCoords);
+      if (!routes || routes.length === 0) return;
 
-      const fastest = {
-        distance: distanceInKm.toFixed(1),
-        duration: durationInMin,
-        co2: (distanceInKm * 0.12).toFixed(1),
-        geometry: route.geometry,
-      };
+      const processedRoutes = routes.map(route => ({
+        ...route,
+        co2: calculateCO2(route.distance, route.duration),
+        distance: parseFloat((route.distance / 1000).toFixed(1)),
+        duration: Math.round(route.duration / 60),
+      }));
 
-      const greenest = {
-        ...fastest,
-        duration: Math.round(durationInMin * 1.1),
-        co2: (distanceInKm * 0.12 * 0.8).toFixed(1), // 20% reduction
-      };
+      const fastest = [...processedRoutes].sort((a, b) => a.duration - b.duration)[0];
+      const greenest = [...processedRoutes].sort((a, b) => a.co2 - b.co2)[0];
 
       setFastestRoute(fastest);
       setGreenestRoute(greenest);
@@ -72,15 +115,23 @@ const Home = () => {
   };
 
   const handleNavigation = (route) => {
-    addCredits(route === greenestRoute ? 15 : 5);
-    navigate("/navigation", { state: { route } });
+    const isGreenest = route.co2 === greenestRoute.co2;
+    setLastGreenestRoute(route, isGreenest);
+    navigate("/navigation", { state: { route, destination: selectedDest } });
   };
+  
+  const co2Difference = fastestRoute && greenestRoute ? (fastestRoute.co2 - greenestRoute.co2).toFixed(1) : 0;
 
   return (
     <div className="mobile-container bg-background">
-      <Map destination={selectedDest} fastestRoute={fastestRoute} greenestRoute={greenestRoute} />
+      <Map 
+        userLocation={userLocation}
+        userHeading={userHeading}
+        destination={selectedDest}
+        fastestRoute={fastestRoute}
+        greenestRoute={greenestRoute}
+      />
 
-      {/* Top bar */}
       <div className="relative z-10 px-4 pt-6">
         <div className="flex items-center justify-between mb-4">
           <img src={verdenLogo} alt="Verden" className="w-8 h-8" />
@@ -90,7 +141,6 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Search bar */}
         <GlassCard variant="strong" className="flex items-center gap-3 px-4 py-3">
           <Search size={20} className="text-muted-foreground" />
           <input
@@ -102,25 +152,46 @@ const Home = () => {
               setQuery(e.target.value);
               setShowSuggestions(true);
               setShowRoutes(false);
-              handleSearch();
+              if(e.target.value.length > 2) handleSearch();
             }}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             onFocus={() => query.length > 0 && setShowSuggestions(true)}
             className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground font-body"
           />
-          {query && (
-            <motion.button
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              onClick={handleSearch}
-              className="bg-primary rounded-xl p-2"
-            >
-              <Navigation2 size={16} className="text-primary-foreground" />
-            </motion.button>
-          )}
         </GlassCard>
 
-        {/* Autocomplete */}
+        <div className="flex justify-around my-3">
+            <GlassButton onClick={() => setTransportMode('car')} variant={transportMode === 'car' ? 'default' : 'glass'} size="icon" className="w-14 h-14"><Car/></GlassButton>
+            <GlassButton onClick={() => setTransportMode('bike')} variant={transportMode === 'bike' ? 'default' : 'glass'} size="icon" className="w-14 h-14 text-2xl">🏍️</GlassButton>
+            <GlassButton onClick={() => setTransportMode('cycle')} variant={transportMode === 'cycle' ? 'default' : 'glass'} size="icon" className="w-14 h-14"><Bike/></GlassButton>
+            <GlassButton onClick={() => setTransportMode('public')} variant={transportMode === 'public' ? 'default' : 'glass'} size="icon" className="w-14 h-14"><Bus/></GlassButton>
+        </div>
+        
+        {transportMode === 'public' && (
+            <motion.div initial={{opacity: 0, height: 0}} animate={{opacity: 1, height: 'auto'}} exit={{opacity: 0, height: 0}}>
+                <GlassCard className="p-2 mb-3">
+                    <p className="text-xs text-center text-muted-foreground mb-2">Select public transport</p>
+                    <div className="flex justify-around text-xs text-foreground">
+                        <label className="flex items-center gap-1 cursor-pointer"><input type="checkbox" checked={publicTransportOptions.bus} onChange={e => setPublicTransportOptions({...publicTransportOptions, bus: e.target.checked})} className="form-checkbox h-3 w-3 text-primary bg-secondary border-border" /> Bus</label>
+                        <label className="flex items-center gap-1 cursor-pointer"><input type="checkbox" checked={publicTransportOptions.shuttle} onChange={e => setPublicTransportOptions({...publicTransportOptions, shuttle: e.target.checked})} className="form-checkbox h-3 w-3 text-primary bg-secondary border-border"/> Shuttle</label>
+                        <label className="flex items-center gap-1 cursor-pointer"><input type="checkbox" checked={publicTransportOptions.metro} onChange={e => setPublicTransportOptions({...publicTransportOptions, metro: e.target.checked})} className="form-checkbox h-3 w-3 text-primary bg-secondary border-border"/> Metro</label>
+                        <label className="flex items-center gap-1 cursor-pointer"><input type="checkbox" checked={publicTransportOptions.cycle} onChange={e => setPublicTransportOptions({...publicTransportOptions, cycle: e.target.checked})} className="form-checkbox h-3 w-3 text-primary bg-secondary border-border"/> Cycle</label>
+                    </div>
+                </GlassCard>
+            </motion.div>
+        )}
+
+        <div className="flex justify-center gap-2">
+            <GlassButton onClick={() => setRoutePreference('fast')} variant={routePreference === 'fast' ? 'default' : 'glass'} size="sm" className="w-1/2">
+                <Zap size={16} className="mr-2" />
+                Fastest
+            </GlassButton>
+            <GlassButton onClick={() => setRoutePreference('eco')} variant={routePreference === 'eco' ? 'glow' : 'glass'} size="sm" className="w-1/2">
+                <Leaf size={16} className="mr-2" />
+                Eco
+            </GlassButton>
+        </div>
+
         <AnimatePresence>
           {showSuggestions && suggestions.length > 0 && (
             <motion.div
@@ -139,7 +210,7 @@ const Home = () => {
                     <MapPin size={16} className="text-primary shrink-0" />
                     <div className="text-left">
                       <p className="text-sm font-medium text-foreground">{place.properties.name}</p>
-                      <p className="text-[11px] text-muted-foreground">{place.properties.street}, {place.properties.city}</p>
+                      <p className="text-[11px] text-muted-foreground">{place.properties.city || place.properties.country}</p>
                     </div>
                   </button>
                 ))}
@@ -149,27 +220,6 @@ const Home = () => {
         </AnimatePresence>
       </div>
 
-      {/* Destination indicator */}
-      <AnimatePresence>
-        {selectedDest && showRoutes && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="relative z-10 px-4 mt-3"
-          >
-            <GlassCard variant="subtle" className="flex items-center gap-2 py-2 px-3">
-              <div className="w-2 h-2 rounded-full bg-primary" />
-              <span className="text-xs text-foreground font-medium">Current Location</span>
-              <span className="text-xs text-muted-foreground mx-1">→</span>
-              <MapPin size={12} className="text-primary" />
-              <span className="text-xs text-foreground font-medium truncate">{selectedDest.properties.name}</span>
-            </GlassCard>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Route options */}
       <AnimatePresence>
         {showRoutes && fastestRoute && greenestRoute && (
           <motion.div
@@ -216,14 +266,16 @@ const Home = () => {
                   </div>
                 </div>
               </div>
-              <motion.div
-                className="mt-3 glass rounded-xl px-3 py-2 flex items-center gap-2"
-                animate={{ scale: [1, 1.02, 1] }}
-                transition={{ repeat: Infinity, duration: 2 }}
-              >
-                <Leaf size={14} className="text-primary" />
-                <span className="text-xs font-medium text-foreground">You save {(fastestRoute.co2 - greenestRoute.co2).toFixed(1)} kg CO₂ with this route</span>
-              </motion.div>
+              {co2Difference > 0 && (
+                <motion.div
+                  className="mt-3 glass rounded-xl px-3 py-2 flex items-center gap-2"
+                  animate={{ scale: [1, 1.02, 1] }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                >
+                  <Leaf size={14} className="text-primary" />
+                  <span className="text-xs font-medium text-foreground">You save {co2Difference} kg CO₂ with this route</span>
+                </motion.div>
+              )}
             </GlassCard>
           </motion.div>
         )}

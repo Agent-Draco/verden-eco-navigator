@@ -8,21 +8,28 @@ import { useEffect, useState } from "react";
 
 const TripSummary = () => {
   const navigate = useNavigate();
-  const { completeTrip } = useApp();
+  const { completeTrip, lastGreenestRoute, addCredits } = useApp();
   const [credited, setCredited] = useState(false);
 
-  const co2Saved = 1.5;
-  const creditsEarned = 15;
+  const route = lastGreenestRoute;
+
+  const co2Saved = route ? (route.co2 * 0.2).toFixed(1) : 0; // Assuming 20% savings for greenest route
+  const creditsEarned = route && route.isGreenest ? 15 : 5;
 
   useEffect(() => {
-    if (!credited) {
-      completeTrip(co2Saved, creditsEarned);
-      setCredited(true);
+    if (route && !credited) {
+        completeTrip(parseFloat(co2Saved), creditsEarned);
+        setCredited(true);
     }
-  }, [credited, completeTrip]);
+  }, [credited, completeTrip, co2Saved, creditsEarned, route]);
+
+  if (!route) {
+    // navigate('/home'); // Optional: redirect if no route data
+    return null;
+  }
 
   const stats = [
-    { label: "Distance", value: "9.1 km", icon: MapPin },
+    { label: "Distance", value: `${route.distance} km`, icon: MapPin },
     { label: "CO₂ Saved", value: `${co2Saved} kg`, icon: Leaf },
     { label: "Credits Earned", value: `+${creditsEarned}`, icon: Award },
   ];
@@ -30,26 +37,6 @@ const TripSummary = () => {
   return (
     <div className="mobile-container bg-background">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] h-[300px] rounded-full bg-verden-neon/10 blur-[100px]" />
-
-      {/* Confetti-like particles */}
-      {[...Array(8)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute w-2 h-2 rounded-full bg-primary/40"
-          initial={{
-            x: 200,
-            y: 100,
-            scale: 0,
-          }}
-          animate={{
-            x: 50 + Math.random() * 300,
-            y: 50 + Math.random() * 200,
-            scale: [0, 1, 0],
-            opacity: [0, 1, 0],
-          }}
-          transition={{ duration: 2, delay: 0.3 + i * 0.1, ease: "easeOut" }}
-        />
-      ))}
 
       <div className="relative z-10 flex flex-col min-h-screen px-6 pt-12 pb-8">
         <motion.div

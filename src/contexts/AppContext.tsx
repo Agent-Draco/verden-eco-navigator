@@ -1,4 +1,6 @@
 import { createContext, useContext, useState, ReactNode } from "react";
+import { supabase } from "@/services/supabase";
+import { useAuth } from "./AuthContext";
 
 interface AppState {
   credits: number;
@@ -28,7 +30,7 @@ interface AppContextType extends AppState {
   unlockAvatar: (id: number) => boolean;
   unlockTheme: (t: string) => boolean;
   completeVehicleSetup: () => void;
-  setLastGreenestRoute: (route: any) => void;
+  setLastGreenestRoute: (route: any, isGreenest: boolean) => void;
   showReward: string | null;
   clearReward: () => void;
 }
@@ -73,6 +75,7 @@ export const useApp = () => {
 };
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
+  const { user } = useAuth();
   const [state, setState] = useState<AppState>(() => {
     const saved = localStorage.getItem("verden_app");
     return saved ? { ...defaultState, ...JSON.parse(saved) } : defaultState;
@@ -109,7 +112,20 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     return true;
   };
 
-  const completeTrip = (co2Saved: number, creditsEarned: number) => {
+  const completeTrip = async (co2Saved: number, creditsEarned: number) => {
+    if (user) {
+      const { data, error } = await supabase.from('trips').insert([
+        {
+          user_id: user.id,
+          co2_saved: co2Saved,
+          credits_earned: creditsEarned,
+        },
+      ]);
+      if (error) {
+        console.error("Error inserting trip:", error);
+      }
+    }
+
     save({
       ...state,
       credits: state.credits + creditsEarned,
@@ -142,7 +158,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   const setTheme = (t: "default" | "dark" | "neon") => save({ ...state, theme: t });
   const setAvatar = (id: number) => save({ ...state, selectedAvatar: id });
-  const setLastGreenestRoute = (route: any) => save({ ...state, lastGreenestRoute: route });
+  const setLastGreenestRoute = (route: any, isGreenest: boolean) => save({ ...state, lastGreenestRoute: {...route, isGreenest} });
 
   const unlockAvatar = (id: number) => {
     if (state.unlockedAvatars.includes(id)) return true;
