@@ -4,13 +4,22 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Car, Fuel, Gauge, Award, ChevronDown } from "lucide-react";
 import GlassCard from "@/components/verden/GlassCard";
 import GlassButton from "@/components/verden/GlassButton";
+import { useApp } from "@/contexts/AppContext";
 
 const fuelTypes = ["Petrol", "Diesel", "Electric", "Hybrid"];
 
 const VehicleSetup = () => {
   const navigate = useNavigate();
+  const { vehicleSetup, completeVehicleSetup } = useApp();
   const [fuel, setFuel] = useState("Petrol");
   const [showFuel, setShowFuel] = useState(false);
+  const [model, setModel] = useState("");
+  const [mileage, setMileage] = useState("");
+
+  const handleSave = () => {
+    if (!vehicleSetup) completeVehicleSetup();
+    navigate("/profile");
+  };
 
   return (
     <div className="mobile-container bg-background">
@@ -25,14 +34,14 @@ const VehicleSetup = () => {
         <h1 className="font-display text-2xl font-bold text-foreground mb-2">Vehicle Profile</h1>
         <p className="text-sm text-muted-foreground mb-8">Set up your vehicle for accurate eco routing.</p>
 
-        {/* Reward */}
-        <GlassCard variant="glow" className="flex items-center gap-3 mb-6">
-          <Award size={20} className="text-primary" />
-          <p className="text-sm font-display font-semibold text-foreground">+20 credits for completing setup</p>
-        </GlassCard>
+        {!vehicleSetup && (
+          <GlassCard variant="glow" className="flex items-center gap-3 mb-6">
+            <Award size={20} className="text-primary" />
+            <p className="text-sm font-display font-semibold text-foreground">+20 credits for completing setup</p>
+          </GlassCard>
+        )}
 
         <div className="space-y-4 mb-8">
-          {/* Fuel type */}
           <div>
             <label className="text-xs text-muted-foreground mb-2 block">Fuel Type</label>
             <GlassCard className="p-0 cursor-pointer" onClick={() => setShowFuel(!showFuel)}>
@@ -57,28 +66,38 @@ const VehicleSetup = () => {
             </GlassCard>
           </div>
 
-          {/* Other fields */}
-          {[
-            { label: "Vehicle Model", icon: Car, placeholder: "e.g., Toyota Camry" },
-            { label: "Mileage (km/L)", icon: Gauge, placeholder: "e.g., 15" },
-          ].map((field) => (
-            <div key={field.label}>
-              <label className="text-xs text-muted-foreground mb-2 block">{field.label}</label>
-              <GlassCard className="flex items-center gap-3 px-4 py-3 p-0">
-                <field.icon size={18} className="text-primary" />
-                <input
-                  type="text"
-                  placeholder={field.placeholder}
-                  className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground"
-                />
-              </GlassCard>
-            </div>
-          ))}
+          <div>
+            <label className="text-xs text-muted-foreground mb-2 block">Vehicle Model</label>
+            <GlassCard className="flex items-center gap-3 px-4 py-3 p-0">
+              <Car size={18} className="text-primary" />
+              <input
+                type="text"
+                placeholder="e.g., Toyota Camry"
+                value={model}
+                onChange={(e) => setModel(e.target.value)}
+                className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground"
+              />
+            </GlassCard>
+          </div>
+
+          <div>
+            <label className="text-xs text-muted-foreground mb-2 block">Mileage (km/L)</label>
+            <GlassCard className="flex items-center gap-3 px-4 py-3 p-0">
+              <Gauge size={18} className="text-primary" />
+              <input
+                type="text"
+                placeholder="e.g., 15"
+                value={mileage}
+                onChange={(e) => setMileage(e.target.value)}
+                className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground"
+              />
+            </GlassCard>
+          </div>
         </div>
 
         <div className="mt-auto">
-          <GlassButton size="lg" className="w-full" onClick={() => navigate("/profile")}>
-            Save & Earn Credits
+          <GlassButton size="lg" className="w-full" onClick={handleSave}>
+            {vehicleSetup ? "Update Vehicle" : "Save & Earn Credits"}
           </GlassButton>
         </div>
       </div>
