@@ -1,10 +1,9 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import VerdenLogo from "@/components/verden/VerdenLogo";
-import GlassButton from "@/components/verden/GlassButton";
 
 const Index = () => {
   const navigate = useNavigate();
-  navigate("/");
+  useEffect(() => { navigate("/"); }, [navigate]);
   return null;
 };
 
