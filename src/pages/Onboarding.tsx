@@ -2,9 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight, Leaf, Route, Award } from "lucide-react";
-import VerdenLogo from "@/components/verden/VerdenLogo";
 import GlassButton from "@/components/verden/GlassButton";
 import MapBackground from "@/components/verden/MapBackground";
+import verdenLogo from "@/assets/verden-logo.png";
 
 const slides = [
   {
@@ -33,7 +33,7 @@ const Onboarding = () => {
 
   const next = () => {
     if (step < 2) setStep(step + 1);
-    else navigate("/home");
+    else navigate("/login");
   };
 
   return (
@@ -51,13 +51,12 @@ const Onboarding = () => {
         >
           {/* Logo */}
           <div className="flex items-center gap-3 mb-auto">
-            <VerdenLogo size={36} />
+            <img src={verdenLogo} alt="Verden" className="w-9 h-9" />
             <span className="font-display text-lg font-semibold text-foreground">Verden</span>
           </div>
 
           {/* Content */}
           <div className="flex-1 flex flex-col justify-center">
-            {/* Icon */}
             <motion.div
               className={`w-24 h-24 rounded-3xl bg-gradient-to-br ${slides[step].color} flex items-center justify-center mb-8 glow-green-sm`}
               initial={{ scale: 0.8 }}
@@ -91,7 +90,6 @@ const Onboarding = () => {
 
           {/* Bottom */}
           <div className="flex items-center justify-between mt-8">
-            {/* Dots */}
             <div className="flex gap-2">
               {[0, 1, 2].map((i) => (
                 <div

@@ -2,17 +2,12 @@ import { motion } from "framer-motion";
 import { Leaf, Flame, Trophy, Target, TrendingUp } from "lucide-react";
 import GlassCard from "@/components/verden/GlassCard";
 import BottomNav from "@/components/verden/BottomNav";
-
-const badges = [
-  { name: "First Ride", earned: true },
-  { name: "10 Eco Trips", earned: true },
-  { name: "CO₂ Saver", earned: true },
-  { name: "Group Rider", earned: false },
-  { name: "100 Credits", earned: false },
-  { name: "Streak King", earned: false },
-];
+import { useApp } from "@/contexts/AppContext";
 
 const Credits = () => {
+  const { credits, ecoScore, streak, totalCO2Saved, totalTrips, badges } = useApp();
+  const tierProgress = Math.min(100, (credits / 300) * 100);
+
   return (
     <div className="mobile-container bg-background">
       <div className="absolute top-0 right-0 w-[250px] h-[250px] rounded-full bg-verden-neon/8 blur-[80px]" />
@@ -27,10 +22,10 @@ const Credits = () => {
             animate={{ scale: [1, 1.05, 1] }}
             transition={{ repeat: Infinity, duration: 2.5 }}
           >
-            <span className="font-display text-2xl font-bold text-primary-foreground">82</span>
+            <span className="font-display text-2xl font-bold text-primary-foreground">{ecoScore}</span>
           </motion.div>
           <p className="font-display font-semibold text-foreground">Eco Score</p>
-          <p className="text-sm text-muted-foreground mt-1">Top 15% of riders</p>
+          <p className="text-sm text-muted-foreground mt-1">Top {Math.max(5, 100 - ecoScore)}% of riders</p>
         </GlassCard>
 
         {/* Credits Balance */}
@@ -40,7 +35,7 @@ const Credits = () => {
           </div>
           <div className="flex-1">
             <p className="text-sm text-muted-foreground">Credit Balance</p>
-            <p className="font-display text-2xl font-bold text-foreground">240</p>
+            <p className="font-display text-2xl font-bold text-foreground">{credits}</p>
           </div>
           <TrendingUp size={20} className="text-primary" />
         </GlassCard>
@@ -49,28 +44,28 @@ const Credits = () => {
         <GlassCard className="mb-6">
           <div className="flex justify-between items-center mb-2">
             <p className="text-sm font-medium text-foreground">Next Milestone</p>
-            <span className="text-xs text-muted-foreground">240/300</span>
+            <span className="text-xs text-muted-foreground">{credits}/300</span>
           </div>
           <div className="h-3 rounded-full bg-muted overflow-hidden">
             <motion.div
               className="h-full bg-gradient-green rounded-full"
               initial={{ width: 0 }}
-              animate={{ width: "80%" }}
+              animate={{ width: `${tierProgress}%` }}
               transition={{ duration: 1, delay: 0.3 }}
             />
           </div>
-          <p className="text-xs text-muted-foreground mt-2">60 credits to Silver Tier 🥈</p>
+          <p className="text-xs text-muted-foreground mt-2">{Math.max(0, 300 - credits)} credits to Silver Tier 🥈</p>
         </GlassCard>
 
         {/* Daily Impact */}
         <h2 className="font-display font-semibold text-foreground mb-3 flex items-center gap-2">
-          <Target size={16} className="text-primary" /> Daily Impact
+          <Target size={16} className="text-primary" /> Impact Stats
         </h2>
         <div className="grid grid-cols-3 gap-3 mb-6">
           {[
-            { label: "Saved", value: "3.2 kg", sub: "CO₂" },
-            { label: "Trips", value: "4", sub: "green" },
-            { label: "Streak", value: "7", sub: "days" },
+            { label: "Saved", value: `${totalCO2Saved} kg`, sub: "CO₂" },
+            { label: "Trips", value: `${totalTrips}`, sub: "total" },
+            { label: "Streak", value: `${streak}`, sub: "days" },
           ].map((s) => (
             <GlassCard key={s.label} variant="subtle" className="text-center p-3">
               <p className="font-display font-bold text-lg text-foreground">{s.value}</p>
@@ -83,7 +78,7 @@ const Credits = () => {
         <GlassCard className="flex items-center gap-3 mb-6">
           <Flame size={22} className="text-destructive" />
           <div>
-            <p className="font-display font-semibold text-foreground text-sm">7-Day Streak 🔥</p>
+            <p className="font-display font-semibold text-foreground text-sm">{streak}-Day Streak 🔥</p>
             <p className="text-xs text-muted-foreground">Keep going for a bonus!</p>
           </div>
         </GlassCard>
