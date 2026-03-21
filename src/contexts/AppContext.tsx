@@ -15,6 +15,7 @@ interface AppState {
   transactions: { id: number; label: string; amount: number; date: string; type: "earn" | "spend" }[];
   joinedGroups: string[];
   vehicleSetup: boolean;
+  lastGreenestRoute: any;
 }
 
 interface AppContextType extends AppState {
@@ -27,6 +28,7 @@ interface AppContextType extends AppState {
   unlockAvatar: (id: number) => boolean;
   unlockTheme: (t: string) => boolean;
   completeVehicleSetup: () => void;
+  setLastGreenestRoute: (route: any) => void;
   showReward: string | null;
   clearReward: () => void;
 }
@@ -59,6 +61,7 @@ const defaultState: AppState = {
   ],
   joinedGroups: [],
   vehicleSetup: false,
+  lastGreenestRoute: null,
 };
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -139,6 +142,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   const setTheme = (t: "default" | "dark" | "neon") => save({ ...state, theme: t });
   const setAvatar = (id: number) => save({ ...state, selectedAvatar: id });
+  const setLastGreenestRoute = (route: any) => save({ ...state, lastGreenestRoute: route });
 
   const unlockAvatar = (id: number) => {
     if (state.unlockedAvatars.includes(id)) return true;
@@ -201,6 +205,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         unlockAvatar,
         unlockTheme,
         completeVehicleSetup,
+        setLastGreenestRoute,
         showReward,
         clearReward: () => setShowReward(null),
       }}

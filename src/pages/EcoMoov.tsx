@@ -4,16 +4,11 @@ import GlassCard from "@/components/verden/GlassCard";
 import GlassButton from "@/components/verden/GlassButton";
 import BottomNav from "@/components/verden/BottomNav";
 import { useApp } from "@/contexts/AppContext";
-
-const groups = [
-  { name: "Sarah K.", match: 94, route: "Downtown → University", time: "8:15 AM", avatar: "SK", members: 3 },
-  { name: "Alex M.", match: 90, route: "Downtown → Tech Park", time: "8:30 AM", avatar: "AM", members: 2 },
-  { name: "Priya D.", match: 85, route: "Midtown → Airport Rd", time: "9:00 AM", avatar: "PD", members: 4 },
-  { name: "Jordan L.", match: 78, route: "Westside → Central", time: "7:45 AM", avatar: "JL", members: 1 },
-];
+import useEcoMoov from "@/hooks/use-ecomoov";
 
 const EcoMoov = () => {
-  const { joinedGroups, joinGroup } = useApp();
+  const { joinedGroups, joinGroup, lastGreenestRoute } = useApp();
+  const groups = useEcoMoov(lastGreenestRoute);
 
   return (
     <div className="mobile-container bg-background">
