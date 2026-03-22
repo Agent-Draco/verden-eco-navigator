@@ -100,7 +100,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             // Repair missing user profile (e.g. if DB was truncated but Auth remained)
             const { data: newData, error: insertError } = await supabase
                 .from('users')
-                .insert([{
+                .upsert([{
                      id: supabaseUser.id,
                      email: supabaseUser.email || '',
                      name: supabaseUser.user_metadata?.name || 'Eco User',

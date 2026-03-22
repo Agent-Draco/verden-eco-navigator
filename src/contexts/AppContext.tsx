@@ -108,10 +108,33 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
           date: new Date(t.created_at).toLocaleDateString(),
         })) || [];
         
+        // Fetch user's historical trips to aggregate impact stats
+        const { data: trips } = await supabase
+          .from('trips')
+          .select('id, co2_saved, departure_time, created_at')
+          .eq('user_id', user.id);
+
+        let sumCO2 = 0;
+        let tTrips = 0;
+        let streakCount = 0;
+
+        if (trips && trips.length > 0) {
+            tTrips = trips.length;
+            sumCO2 = trips.reduce((acc, curr) => acc + (Number(curr.co2_saved) || 0), 0);
+            
+            // Calculate general active streak by counting unique days driven
+            const days = new Set(trips.map(t => new Date(t.departure_time || t.created_at).toDateString()));
+            streakCount = days.size;
+        }
+
         setState((prev) => ({
           ...prev,
           transactions: mappedTxs,
           credits: user.credits !== undefined ? user.credits : prev.credits,
+          ecoScore: user.eco_score !== undefined ? user.eco_score : prev.ecoScore,
+          totalTrips: tTrips > 0 ? tTrips : prev.totalTrips,
+          totalCO2Saved: sumCO2 > 0 ? Number(sumCO2.toFixed(1)) : prev.totalCO2Saved,
+          streak: streakCount > 0 ? streakCount : prev.streak, 
         }));
       };
       
