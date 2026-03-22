@@ -1,0 +1,47 @@
+**Terms and Conditions – Verden**
+
+Last Updated: 3/21/2026
+
+Welcome to Verden. By accessing or using our application, you agree to the following terms.
+
+### 1. Use of Service
+
+Verden is a navigation and mobility platform designed to provide route optimization, environmental insights, and collaborative travel features. You agree to use the service responsibly and not misuse or disrupt its functionality.
+
+### 2. User Accounts
+
+You are responsible for maintaining the confidentiality of your account. You agree to provide accurate information and not impersonate others.
+
+### 3. Location Data
+
+Verden uses real-time location data to provide navigation, route suggestions, and EcoMoov matching. By using the app, you consent to this usage.
+
+### 4. EcoMoov & Group Travel
+
+Verden facilitates user coordination for shared travel. Verden is not responsible for user conduct, safety, or arrangements made between users.
+
+### 5. Simulated Services
+
+Some features (such as public transport timing or ride booking simulations) are approximations and may not reflect real-world conditions.
+
+### 6. Environmental Insights
+
+CO₂ calculations and eco recommendations are estimates and should not be considered scientifically exact.
+
+### 7. Payments & Credits
+
+Credits within the app are virtual and may not have direct monetary value unless explicitly stated.
+
+### 8. Limitation of Liability
+
+Verden is not liable for delays, route inaccuracies, or any damages arising from use of the service.
+
+### 9. Changes to Service
+
+We may modify or discontinue features at any time without prior notice.
+
+### 10. Acceptance
+
+By using Verden, you agree to these terms.
+
+Contact: [terra.llc@outlook.com](mailto:terra.llc@outlook.com)

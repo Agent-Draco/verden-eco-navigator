@@ -12,7 +12,7 @@ const Wallet = () => {
     <div className="mobile-container bg-background">
       <div className="absolute top-0 left-0 w-[200px] h-[200px] rounded-full bg-verden-sky/10 blur-[80px]" />
 
-      <div className="relative z-10 px-5 pt-8 pb-28 overflow-y-auto max-h-screen">
+      <div className="relative z-10 px-5 pt-8 pb-32 overflow-y-auto max-h-screen">
         <h1 className="font-display text-2xl font-bold text-foreground mb-6">Wallet</h1>
 
         {/* Balance card */}

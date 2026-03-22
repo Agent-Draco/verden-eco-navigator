@@ -1,103 +1,162 @@
 import { useState, useEffect } from "react";
 import { getRoute } from "@/services/osrm";
 import * as turf from "@turf/turf";
+import { supabase } from "@/services/supabase";
 
-// --- Mock Data ---
-const mockUsers = [
-  { id: 1, name: "Sarah K.", avatar: "SK", departureTime: new Date(Date.now() + 5 * 60000) },
-  { id: 2, name: "Alex M.", avatar: "AM", departureTime: new Date(Date.now() + 12 * 60000) },
-  { id: 3, name: "Priya D.", avatar: "PD", departureTime: new Date(Date.now() + 8 * 60000) },
-  { id: 4, name: "Jordan L.", avatar: "JL", departureTime: new Date(Date.now() + 20 * 60000) },
-  { id: 5, name: "Chris G.", avatar: "CG", departureTime: new Date(Date.now() + 2 * 60000) },
-];
+interface HistoricalCommute {
+    id: string; 
+    name: string;
+    avatar: string;
+    startPoint: [number, number]; 
+    endPoint: [number, number];   
+    avgDepartureHour: number;
+    avgDepartureMinute: number;
+    frequencyPerWeek: number;
+}
 
-const generateUserRoutes = async (userRoute) => {
+// --- Historical Data Aggregation ---
+// In a production environment, this clustering would happen on a backend CRON job.
+// We simulate the "AI scanning an extended period of user trips" by querying the database 
+// and clustering the last 30 days of trips to find their primary commute centroid.
+const fetchHistoricalPatterns = async (): Promise<HistoricalCommute[]> => {
+  const { data: usersData, error: usersError } = await supabase.from('users').select('*');
+  if (usersError || !usersData) return [];
+
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+
+  // Scan the extended period of trips
+  const { data: tripsData, error: tripsError } = await supabase
+    .from('trips')
+    .select('user_id, start_lat, start_lon, end_lat, end_lon, departure_time')
+    .gte('departure_time', thirtyDaysAgo);
+    
+  if (tripsError || !tripsData) return [];
+
+  const userCommutes: HistoricalCommute[] = [];
+
+  for (const user of usersData) {
+     const userTrips = tripsData.filter((t: any) => t.user_id === user.id && t.start_lat && t.start_lon);
+     if (userTrips.length === 0) continue;
+
+     let avgStartLat = 0, avgStartLon = 0, avgEndLat = 0, avgEndLon = 0;
+     let totalHour = 0, totalMinute = 0;
+
+     userTrips.forEach((t: any) => {
+       avgStartLat += Number(t.start_lat);
+       avgStartLon += Number(t.start_lon);
+       avgEndLat += Number(t.end_lat);
+       avgEndLon += Number(t.end_lon);
+       
+       const d = new Date(t.departure_time);
+       totalHour += d.getHours();
+       totalMinute += d.getMinutes();
+     });
+
+     const tripCount = userTrips.length;
+     const avgHour = Math.round(totalHour / tripCount);
+     const avgMin = Math.round(totalMinute / tripCount);
+     const frequencyPerWeek = Math.round(tripCount / 4.28);
+
+     userCommutes.push({
+         id: user.id,
+         name: user.name,
+         avatar: user.avatar,
+         startPoint: [avgStartLat / tripCount, avgStartLon / tripCount],
+         endPoint: [avgEndLat / tripCount, avgEndLon / tripCount],
+         avgDepartureHour: avgHour,
+         avgDepartureMinute: avgMin,
+         frequencyPerWeek,
+     });
+  }
+
+  return userCommutes;
+};
+
+// --- AI Matching Algorithm ---
+const scanHistoricalMatches = async (userRoute: any, userDepartureTime: Date) => {
   if (!userRoute) return [];
   const userStartCoords = userRoute.geometry.coordinates[0];
   const userEndCoords = userRoute.geometry.coordinates[userRoute.geometry.coordinates.length - 1];
+  
+  const userHour = userDepartureTime.getHours();
+  const userMinute = userDepartureTime.getMinutes();
+  const userTimeInMinutes = userHour * 60 + userMinute;
 
-  const generatedRoutes = await Promise.all(mockUsers.map(async (user) => {
-    const startOffset = (Math.random() - 0.5) * 0.02;
-    const endOffset = (Math.random() - 0.5) * 0.02;
-    const startPoint = [userStartCoords[0] + startOffset, userStartCoords[1] + startOffset];
-    const endPoint = [userEndCoords[0] + endOffset, userEndCoords[1] + endOffset];
+  // Retrieve the ML clustered history
+  const historicalPatterns = await fetchHistoricalPatterns();
 
+  const generatedMatches = await Promise.all(historicalPatterns.map(async (user) => {
     try {
-      const routes = await getRoute(startPoint, endPoint);
+      // Map their clustered historical centroid onto a live driving route
+      const routes = await getRoute(user.startPoint, user.endPoint);
       if (routes && routes.length > 0) {
-        return { ...user, route: routes[0] };
+        
+        // 1. Spatial Overlap Score (0-1)
+        const startDist = turf.distance(turf.point(userStartCoords), turf.point(user.startPoint));
+        const endDist = turf.distance(turf.point(userEndCoords), turf.point(user.endPoint));
+        const avgDistKm = (startDist + endDist) / 2;
+        // Perfect local score if < 1km, linearly decaying up to isolated 10km discrepancy
+        const spatialScore = Math.max(0, 1 - (avgDistKm / 10));
+
+        // 2. Temporal Compatibility Score (0-1)
+        const historicalTimeInMinutes = user.avgDepartureHour * 60 + user.avgDepartureMinute;
+        const timeDiff = Math.abs(userTimeInMinutes - historicalTimeInMinutes);
+        // Scored linearly up to 90 mins max difference
+        const temporalScore = Math.max(0, 1 - (timeDiff / 90));
+
+        // 3. Consistency/Frequency Score (0-1)
+        const consistencyScore = user.frequencyPerWeek / 7;
+
+        // --- Final AI Match Processing ---
+        const rawScore = (spatialScore * 0.5) + (temporalScore * 0.35) + (consistencyScore * 0.15);
+        const matchScore = Math.round(rawScore * 100);
+
+        if (matchScore >= 40) { 
+             const departureDate = new Date();
+             departureDate.setHours(user.avgDepartureHour, user.avgDepartureMinute, 0, 0);
+
+             return { 
+                 id: user.id, 
+                 name: user.name, 
+                 avatar: user.avatar, 
+                 route: routes[0],
+                 match: matchScore,
+                 departureTime: departureDate,
+                 members: Math.floor(Math.random() * 3) + 1,
+                 frequency: user.frequencyPerWeek
+             };
+        }
       }
     } catch (error) {
-      console.error("Error generating mock route:", error);
+      console.error("Error evaluating historical AI match:", error);
     }
     return null;
   }));
 
-  return generatedRoutes.filter(Boolean);
-};
-
-
-// --- Matching Logic ---
-const calculateRouteOverlap = (routeA, routeB) => {
-  const lineA = turf.lineString(routeA.geometry.coordinates);
-  const lineB = turf.lineString(routeB.geometry.coordinates);
-  const lengthA = turf.length(lineA, { units: 'kilometers' });
-  
-  if (lengthA === 0) return 0;
-
-  const intersection = turf.lineIntersect(lineA, lineB);
-  if (intersection.features.length === 0) return 0;
-
-  // A more robust way to calculate overlap is to find the longest shared segment,
-  // but for this simulation, we'll simplify by checking intersection and proximity.
-  // A simple heuristic: if they intersect, we estimate overlap based on start/end proximity.
-  const startDist = turf.distance(turf.point(routeA.geometry.coordinates[0]), turf.point(routeB.geometry.coordinates[0]));
-  const endDist = turf.distance(turf.point(routeA.geometry.coordinates.slice(-1)[0]), turf.point(routeB.geometry.coordinates.slice(-1)[0]));
-  
-  const totalDist = startDist + endDist;
-  const overlap = Math.max(0, 1 - totalDist / (lengthA * 0.5)); // Heuristic adjustment
-  
-  return overlap;
-};
-
-const calculateTimeCompatibility = (timeA, timeB) => {
-  const timeDiffMinutes = Math.abs(timeA.getTime() - timeB.getTime()) / (1000 * 60);
-  if (timeDiffMinutes > 15) return 0;
-  return 1 - (timeDiffMinutes / 15);
+  return generatedMatches.filter(Boolean).sort((a: any, b: any) => b.match - a.match);
 };
 
 
 // --- Main Hook ---
-const useEcoMoov = (userRoute, userDepartureTime) => {
-  const [groups, setGroups] = useState([]);
+const useEcoMoov = (userRoute: any, userDepartureTime: Date) => {
+  const [groups, setGroups] = useState<any[]>([]);
 
   useEffect(() => {
+    let active = true;
+
     const findMatches = async () => {
-      if (!userRoute) return;
-
-      const potentialMatches = await generateUserRoutes(userRoute);
-      
-      const scoredMatches = potentialMatches.map(matchUser => {
-        if (!matchUser.route) return null;
-
-        const routeOverlap = calculateRouteOverlap(userRoute, matchUser.route);
-        const timeMatch = calculateTimeCompatibility(userDepartureTime, matchUser.departureTime);
-
-        const matchScore = (routeOverlap * 0.7) + (timeMatch * 0.3);
-
-        if (matchScore < 0.4) return null; // Filter out low scores
-
-        return {
-          ...matchUser,
-          match: Math.round(matchScore * 100),
-          members: Math.floor(Math.random() * 3) + 1, // 1-3 members already in the group
-        };
-      });
-
-      setGroups(scoredMatches.filter(Boolean).sort((a, b) => b.match - a.match));
+      if (!userRoute || !userDepartureTime) {
+         if (active) setGroups([]);
+         return;
+      }
+      const matches = await scanHistoricalMatches(userRoute, userDepartureTime);
+      if (active) setGroups(matches);
     };
 
     findMatches();
+
+    return () => { active = false; };
   }, [userRoute, userDepartureTime]);
 
   return groups;

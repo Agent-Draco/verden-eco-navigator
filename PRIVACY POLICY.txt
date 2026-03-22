@@ -1,0 +1,60 @@
+**Privacy Policy – Verden**
+
+Last Updated: 3/21/2026
+
+Verden values your privacy. This policy explains how we collect, use, and protect your data.
+
+### 1. Information We Collect
+
+We may collect:
+
+* Account information (email, profile data)
+* Location data (real-time and historical)
+* Device and usage data
+* Travel and route history
+
+### 2. How We Use Data
+
+We use your data to:
+
+* Provide navigation and routing services
+* Enable EcoMoov matching
+* Calculate environmental impact
+* Improve app performance
+
+### 3. Location Data
+
+Location data is essential for core functionality. It is used to provide accurate routes and matching features.
+
+### 4. Data Sharing
+
+We do not sell your personal data. Data may be shared:
+
+* With service providers (e.g., Supabase, mapping APIs)
+* When required by law
+
+### 5. Data Storage
+
+Your data is securely stored using trusted backend services.
+
+### 6. User Control
+
+You can:
+
+* Update your profile
+* Request deletion of your data
+* Disable location access (with reduced functionality)
+
+### 7. Security
+
+We implement reasonable safeguards to protect your data.
+
+### 8. Children’s Privacy
+
+Verden is not intended for users under 13 years of age.
+
+### 9. Updates
+
+We may update this policy periodically.
+
+Contact: [terra.llc@outlook.com](mailto:terra.llc@outlook.com)

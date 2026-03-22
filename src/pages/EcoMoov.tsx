@@ -6,6 +6,7 @@ import GlassCard from "@/components/verden/GlassCard";
 import GlassButton from "@/components/verden/GlassButton";
 import BottomNav from "@/components/verden/BottomNav";
 import { useApp } from "@/contexts/AppContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const mockMatches = [
   { id: "match1", name: "Tech Park Riders", matchScore: 92, members: 4, route: "HSR Layout → ITPL", time: "8:45 AM" },
@@ -21,7 +22,8 @@ const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const EcoMoov = () => {
   const navigate = useNavigate();
-  const { user, credits } = useApp();
+  const { credits } = useApp();
+  const { user } = useAuth();
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const renderCalendar = () => {
@@ -58,7 +60,7 @@ const EcoMoov = () => {
 
   return (
     <div className="mobile-container bg-background text-foreground">
-      <div className="p-4 pt-6">
+      <div className="relative z-10 px-5 pt-8 pb-32 overflow-y-auto max-h-screen">
         <h1 className="font-display text-3xl font-bold mb-1">EcoMoov</h1>
         <p className="text-muted-foreground mb-4">Intelligent commute planning.</p>
 

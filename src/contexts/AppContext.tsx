@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { supabase } from "@/services/supabase";
 import { useAuth } from "./AuthContext";
 
@@ -78,63 +78,117 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
   const [state, setState] = useState<AppState>(() => {
     const saved = localStorage.getItem("verden_app");
-    return saved ? { ...defaultState, ...JSON.parse(saved) } : defaultState;
+    if (saved) {
+        try {
+            return { ...defaultState, ...JSON.parse(saved) };
+        } catch (e) {
+            console.error("Failed to parse app state from local storage. Resetting to default.", e);
+            localStorage.removeItem("verden_app");
+        }
+    }
+    return defaultState;
   });
   const [showReward, setShowReward] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      const fetchUserData = async () => {
+        // Fetch real transactions and sync credits from remote
+        const { data: txs } = await supabase
+          .from('transactions')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+          
+        const mappedTxs = txs?.map((t: any) => ({
+          id: t.id,
+          label: t.label,
+          amount: t.amount,
+          type: t.type,
+          date: new Date(t.created_at).toLocaleDateString(),
+        })) || [];
+        
+        setState((prev) => ({
+          ...prev,
+          transactions: mappedTxs,
+          credits: user.credits !== undefined ? user.credits : prev.credits,
+        }));
+      };
+      
+      fetchUserData();
+    }
+  }, [user]);
 
   const save = (s: AppState) => {
     setState(s);
     localStorage.setItem("verden_app", JSON.stringify(s));
   };
 
+  const persistTransaction = async (amount: number, label: string, type: 'earn' | 'spend', newTotalCredits: number) => {
+    if (!user) return;
+    try {
+      await supabase.from('transactions').insert([{ 
+        user_id: user.id, 
+        label, 
+        amount: Math.abs(amount), 
+        type 
+      }]);
+      await supabase.from('users').update({ credits: newTotalCredits }).eq('id', user.id);
+    } catch (e) {
+      console.error("Failed to log transaction remotely:", e);
+    }
+  };
+
   const addCredits = (amount: number, label: string) => {
+    const newTotal = state.credits + amount;
     save({
       ...state,
-      credits: state.credits + amount,
+      credits: newTotal,
       transactions: [
-        { id: Date.now(), label, amount, date: "Just now", type: "earn" },
+        { id: Date.now() as any, label, amount, date: "Just now", type: "earn" },
         ...state.transactions,
       ],
     });
+    persistTransaction(amount, label, 'earn', newTotal);
     setShowReward(`+${amount} credits`);
   };
 
   const spendCredits = (amount: number, label: string) => {
     if (state.credits < amount) return false;
+    const newTotal = state.credits - amount;
     save({
       ...state,
-      credits: state.credits - amount,
+      credits: newTotal,
       transactions: [
-        { id: Date.now(), label, amount: -amount, date: "Just now", type: "spend" },
+        { id: Date.now() as any, label, amount: -amount, date: "Just now", type: "spend" },
         ...state.transactions,
       ],
     });
+    persistTransaction(amount, label, 'spend', newTotal);
     return true;
   };
 
   const completeTrip = async (co2Saved: number, creditsEarned: number) => {
+    const newTotal = state.credits + creditsEarned;
     if (user) {
-      const { data, error } = await supabase.from('trips').insert([
-        {
-          user_id: user.id,
-          co2_saved: co2Saved,
-          credits_earned: creditsEarned,
-        },
-      ]);
-      if (error) {
-        console.error("Error inserting trip:", error);
-      }
+      const { error } = await supabase.from('trips').insert([{
+        user_id: user.id,
+        co2_saved: co2Saved,
+        credits_earned: creditsEarned,
+      }]);
+      if (error) console.error("Error inserting trip:", error);
+      persistTransaction(creditsEarned, "Trip Complete", 'earn', newTotal);
     }
 
     save({
       ...state,
-      credits: state.credits + creditsEarned,
+      credits: newTotal,
       totalTrips: state.totalTrips + 1,
       totalCO2Saved: +(state.totalCO2Saved + co2Saved).toFixed(1),
       streak: state.streak + 1,
       ecoScore: Math.min(100, state.ecoScore + 1),
       transactions: [
-        { id: Date.now(), label: "Trip Complete", amount: creditsEarned, date: "Just now", type: "earn" },
+        { id: Date.now() as any, label: "Trip Complete", amount: creditsEarned, date: "Just now", type: "earn" },
         ...state.transactions,
       ],
     });
@@ -144,15 +198,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const joinGroup = (name: string) => {
     if (state.joinedGroups.includes(name)) return;
     const bonus = 8;
+    const newTotal = state.credits + bonus;
     save({
       ...state,
-      credits: state.credits + bonus,
+      credits: newTotal,
       joinedGroups: [...state.joinedGroups, name],
       transactions: [
-        { id: Date.now(), label: `Joined ${name}'s group`, amount: bonus, date: "Just now", type: "earn" },
+        { id: Date.now() as any, label: `Joined ${name}'s group`, amount: bonus, date: "Just now", type: "earn" },
         ...state.transactions,
       ],
     });
+    persistTransaction(bonus, `Joined ${name}'s group`, 'earn', newTotal);
     setShowReward(`+${bonus} bonus credits for joining!`);
   };
 
@@ -163,16 +219,18 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const unlockAvatar = (id: number) => {
     if (state.unlockedAvatars.includes(id)) return true;
     if (state.credits < 50) return false;
+    const newTotal = state.credits - 50;
     save({
       ...state,
-      credits: state.credits - 50,
+      credits: newTotal,
       unlockedAvatars: [...state.unlockedAvatars, id],
       selectedAvatar: id,
       transactions: [
-        { id: Date.now(), label: "Avatar Unlock", amount: -50, date: "Just now", type: "spend" },
+        { id: Date.now() as any, label: "Avatar Unlock", amount: -50, date: "Just now", type: "spend" },
         ...state.transactions,
       ],
     });
+    persistTransaction(50, "Avatar Unlock", 'spend', newTotal);
     setShowReward("New avatar unlocked!");
     return true;
   };
@@ -180,31 +238,35 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const unlockTheme = (t: string) => {
     if (state.unlockedThemes.includes(t)) return true;
     if (state.credits < 100) return false;
+    const newTotal = state.credits - 100;
     save({
       ...state,
-      credits: state.credits - 100,
+      credits: newTotal,
       unlockedThemes: [...state.unlockedThemes, t],
       theme: t as AppState["theme"],
       transactions: [
-        { id: Date.now(), label: "Theme Unlock", amount: -100, date: "Just now", type: "spend" },
+        { id: Date.now() as any, label: "Theme Unlock", amount: -100, date: "Just now", type: "spend" },
         ...state.transactions,
       ],
     });
+    persistTransaction(100, "Theme Unlock", 'spend', newTotal);
     setShowReward("New theme unlocked!");
     return true;
   };
 
   const completeVehicleSetup = () => {
     if (state.vehicleSetup) return;
+    const newTotal = state.credits + 20;
     save({
       ...state,
       vehicleSetup: true,
-      credits: state.credits + 20,
+      credits: newTotal,
       transactions: [
-        { id: Date.now(), label: "Vehicle Setup Bonus", amount: 20, date: "Just now", type: "earn" },
+        { id: Date.now() as any, label: "Vehicle Setup Bonus", amount: 20, date: "Just now", type: "earn" },
         ...state.transactions,
       ],
     });
+    persistTransaction(20, "Vehicle Setup Bonus", 'earn', newTotal);
     setShowReward("+20 credits for vehicle setup!");
   };
 

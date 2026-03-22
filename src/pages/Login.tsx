@@ -40,32 +40,32 @@ const Login = () => {
           animate={{ opacity: 1, y: 0 }}
           className="flex flex-col items-center mb-10"
         >
-          <img src={verdenLogo} alt="Verden" className="w-16 h-16 mb-4" />
+          <img src={verdenLogo} alt="Verden" className="w-24 h-24 mb-4 rounded-2xl shadow-lg" />
           <h1 className="font-display text-2xl font-bold text-foreground">Welcome Back</h1>
           <p className="text-sm text-muted-foreground mt-1">Sign in to continue</p>
         </motion.div>
 
         <div className="space-y-4 mb-6">
-          <GlassCard className="flex items-center gap-3 px-4 py-3 p-0">
-            <Mail size={18} className="text-primary" />
+          <GlassCard className="flex items-center gap-3 px-4 py-4">
+            <Mail size={20} className="text-primary" />
             <input
               type="email"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground"
+              className="flex-1 bg-transparent outline-none text-base text-foreground placeholder:text-muted-foreground"
             />
           </GlassCard>
 
-          <GlassCard className="flex items-center gap-3 px-4 py-3 p-0">
-            <Lock size={18} className="text-primary" />
+          <GlassCard className="flex items-center gap-3 px-4 py-4">
+            <Lock size={20} className="text-primary" />
             <input
               type={showPass ? "text" : "password"}
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-              className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground"
+              className="flex-1 bg-transparent outline-none text-base text-foreground placeholder:text-muted-foreground"
             />
             <button onClick={() => setShowPass(!showPass)} className="text-muted-foreground">
               {showPass ? <EyeOff size={16} /> : <Eye size={16} />}

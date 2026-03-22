@@ -10,6 +10,7 @@ import { useApp } from "@/contexts/AppContext";
 import verdenLogo from "@/assets/verden-logo.png";
 import { searchPlaces } from "@/services/photon";
 import { getRoute } from "@/services/osrm";
+import { useGeoNavigation } from "@/hooks/useGeoNavigation";
 
 const Home = () => {
   const [query, setQuery] = useState("");
@@ -19,42 +20,19 @@ const Home = () => {
   const [selectedDest, setSelectedDest] = useState(null);
   const [fastestRoute, setFastestRoute] = useState(null);
   const [greenestRoute, setGreenestRoute] = useState(null);
-  const [userLocation, setUserLocation] = useState(null);
-  const [userHeading, setUserHeading] = useState(0);
 
   const [transportMode, setTransportMode] = useState<'car' | 'bike' | 'cycle' | 'public'>('car');
   const [routePreference, setRoutePreference] = useState<'fast' | 'eco'>('fast');
   const [publicTransportOptions, setPublicTransportOptions] = useState({
-    bus: true,
-    shuttle: true,
-    metro: true,
-    cycle: true,
+    bus: true, shuttle: true, metro: true, cycle: true,
   });
+
+  // ── Automatic GPS + compass + speed (no manual entry) ─────────────────────
+  const { location: userLocation, bearing: userHeading } = useGeoNavigation();
 
   const navigate = useNavigate();
   const { credits, setLastGreenestRoute } = useApp();
   const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (navigator.geolocation) {
-      const watchId = navigator.geolocation.watchPosition(
-        (position) => {
-          const { latitude, longitude, heading } = position.coords;
-          setUserLocation([latitude, longitude]);
-          if (heading !== null) {
-            setUserHeading(heading);
-          }
-        },
-        () => console.error("Unable to retrieve your location"),
-        {
-          enableHighAccuracy: true,
-          timeout: 5000,
-          maximumAge: 0,
-        }
-      );
-      return () => navigator.geolocation.clearWatch(watchId);
-    }
-  }, []);
 
   const handleSearch = async () => {
     if (query.trim()) {
@@ -120,13 +98,14 @@ const Home = () => {
     navigate("/navigation", { state: { route, destination: selectedDest } });
   };
   
-  const co2Difference = fastestRoute && greenestRoute ? (fastestRoute.co2 - greenestRoute.co2).toFixed(1) : 0;
+  const co2Difference = fastestRoute && greenestRoute ? parseFloat((fastestRoute.co2 - greenestRoute.co2).toFixed(1)) : 0;
 
   return (
     <div className="mobile-container bg-background">
       <Map 
         userLocation={userLocation}
         userHeading={userHeading}
+        bearing={userHeading}
         destination={selectedDest}
         fastestRoute={fastestRoute}
         greenestRoute={greenestRoute}

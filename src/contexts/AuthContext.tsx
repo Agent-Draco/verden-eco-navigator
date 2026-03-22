@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { supabase } from "@/services/supabase";
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
+import LoadingScreen from "@/components/verden/LoadingScreen";
 
 interface User {
   id: string;
@@ -40,13 +41,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     setLoading(true);
     const getActiveSession = async () => {
-        const { data: { session: activeSession } } = await supabase.auth.getSession();
-        setSession(activeSession);
-        if (activeSession?.user) {
-            const profile = await fetchUserProfile(activeSession.user);
-            setUser(profile);
+        try {
+            const { data: { session: activeSession } } = await supabase.auth.getSession();
+            setSession(activeSession);
+            if (activeSession?.user) {
+                const profile = await fetchUserProfile(activeSession.user);
+                setUser(profile);
+            }
+        } catch (error) {
+            console.warn("Supabase auth check failed. Check your credentials.", error);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
     
     getActiveSession();
@@ -75,7 +81,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             .eq('id', supabaseUser.id)
             .single();
 
-        if (error && status !== 406) { // 406 is for single() not finding a row
+        if (error && status !== 406) { 
             throw error;
         }
 
@@ -90,6 +96,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 eco_score: data.eco_score || 0,
                 theme: data.theme || 'default',
             };
+        } else {
+            // Repair missing user profile (e.g. if DB was truncated but Auth remained)
+            const { data: newData, error: insertError } = await supabase
+                .from('users')
+                .insert([{
+                     id: supabaseUser.id,
+                     email: supabaseUser.email || '',
+                     name: supabaseUser.user_metadata?.name || 'Eco User',
+                     credits: 100,
+                     eco_score: 50,
+                     avatar: 'default',
+                     theme: 'default'
+                }])
+                .select()
+                .single();
+                
+            if (newData) {
+                return {
+                    id: newData.id,
+                    name: newData.name,
+                    email: supabaseUser.email || '',
+                    avatar: newData.avatar || 'default',
+                    memberSince: new Date(newData.created_at).toLocaleDateString(),
+                    credits: newData.credits || 0,
+                    eco_score: newData.eco_score || 0,
+                    theme: newData.theme || 'default',
+                };
+            } else if (insertError) {
+                console.error('Failed to auto-repair missing public.user profile:', insertError);
+            }
         }
     } catch (error) {
         console.error('Error fetching user profile:', error);
@@ -101,24 +137,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          name,
+        }
+      }
     });
 
     if (authError) throw authError;
     if (!authData.user) throw new Error("Signup failed, no user returned");
-
-    const { error: profileError } = await supabase.from('users').insert({
-        id: authData.user.id,
-        email: authData.user.email,
-        name: name,
-        credits: 0,
-        eco_score: 0,
-        avatar: 'default',
-        theme: 'default'
-    });
-
-    if (profileError) {
-      throw profileError;
-    }
 
     const profile = await fetchUserProfile(authData.user);
     setUser(profile);
@@ -160,5 +187,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     logout,
   };
 
-  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {loading ? <LoadingScreen /> : children}
+    </AuthContext.Provider>
+  );
 };

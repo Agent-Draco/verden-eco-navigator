@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { User, Wallet, Car, Crown, ChevronRight, Palette, Settings, LogOut } from "lucide-react";
+import { User, Wallet, Car, Crown, ChevronRight, Palette, Settings, LogOut, Moon, Sun, FileText, Shield } from "lucide-react";
+import { useTheme } from "@/components/theme-provider";
 import GlassCard from "@/components/verden/GlassCard";
 import BottomNav from "@/components/verden/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,12 +14,15 @@ const Profile = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { credits, totalTrips, totalCO2Saved, streak, selectedAvatar, tier } = useApp();
+  const { theme, setTheme } = useTheme();
 
   const menuItems = [
     { icon: Car, label: "Vehicle Profile", path: "/vehicle", detail: "Setup" },
     { icon: Palette, label: "Customize", path: "/customize", detail: "" },
     { icon: Crown, label: "Membership", path: "#", detail: tier },
     { icon: Settings, label: "Settings", path: "#", detail: "" },
+    { icon: FileText, label: "Terms & Conditions", path: "/terms", detail: "" },
+    { icon: Shield, label: "Privacy Policy", path: "/privacy", detail: "" },
   ];
 
   const handleLogout = () => {
@@ -30,7 +34,7 @@ const Profile = () => {
     <div className="mobile-container bg-background">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[250px] h-[250px] rounded-full bg-verden-lavender/10 blur-[80px]" />
 
-      <div className="relative z-10 px-5 pt-8 pb-28 overflow-y-auto max-h-screen">
+      <div className="relative z-10 px-5 pt-8 pb-32 overflow-y-auto max-h-screen">
         <div className="flex items-center gap-4 mb-8">
           <div className="w-16 h-16 rounded-2xl bg-gradient-green flex items-center justify-center text-3xl">
             {avatarEmojis[selectedAvatar] || "🌿"}
@@ -87,6 +91,17 @@ const Profile = () => {
               <ChevronRight size={16} className="text-muted-foreground" />
             </GlassCard>
           ))}
+
+          <GlassCard
+            className="flex items-center gap-3 cursor-pointer px-4 py-3"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          >
+            {theme === "dark" ? <Sun size={18} className="text-primary" /> : <Moon size={18} className="text-primary" />}
+            <span className="flex-1 text-sm font-medium text-foreground">
+              {theme === "dark" ? "Light Mode" : "Dark Mode"}
+            </span>
+          </GlassCard>
+
 
           <GlassCard
             className="flex items-center gap-3 cursor-pointer px-4 py-3"
