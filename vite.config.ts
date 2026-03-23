@@ -30,6 +30,11 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
+  preview: {
+    host: "0.0.0.0",
+    port: Number(process.env.PORT) || 10000,
+    allowedHosts: ["verden-maps.onrender.com"],
+  },
   plugins: [
     react(),
     mode === "development" && componentTagger(),

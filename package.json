@@ -6,8 +6,10 @@
   "scripts": {
     "dev": "vite",
     "start": "vite --open",
+    "serve": "vite preview",
     "start:clean": "vite --force --port 5555 --strictPort",
     "build": "vite build",
+    "render": "tsc && vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -15,7 +17,8 @@
     "test:watch": "vitest",
     "verdev": "npm install && npm run start:clean",
     "verden": "npm install && npm run build && npm run preview",
-    "terra": "npm install && npm run build"
+    "terra": "npm install && npm run build",
+    "engage": "npx serve -s dist"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
