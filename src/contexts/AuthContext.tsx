@@ -1,7 +1,6 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { supabase } from "@/services/supabase";
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
-import LoadingScreen from "@/components/verden/LoadingScreen";
 
 interface User {
   id: string;
@@ -189,7 +188,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider value={value}>
-      {loading ? <LoadingScreen /> : children}
+      {children}
     </AuthContext.Provider>
   );
 };

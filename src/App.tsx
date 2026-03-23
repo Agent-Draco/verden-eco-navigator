@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AppProvider } from "@/contexts/AppContext";
 import AuthLayout from "@/components/verden/AuthLayout";
-import LoadingScreen from "@/components/verden/LoadingScreen";
 
 const Home = lazy(() => import("@/pages/Home"));
 const Navigation = lazy(() => import("@/pages/Navigation"));
@@ -25,7 +24,7 @@ const PrivacyPolicy = lazy(() => import("@/pages/PrivacyPolicy"));
 const App = () => {
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <Suspense fallback={<LoadingScreen />}>
+      <Suspense fallback={null}>
         <AuthProvider>
           <AppProvider>
             <Routes>
