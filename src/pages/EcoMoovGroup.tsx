@@ -8,46 +8,12 @@ import GroupDecision from "@/components/verden/GroupDecision";
 import SimulatedRideBooking from "@/components/verden/SimulatedRideBooking";
 import { useApp } from "@/contexts/AppContext";
 
-const mockGroup = {
-  id: "group1",
-  name: "Morning Commuters",
-  members: [
-    { name: "You", avatar: "Y", isDriver: false, vehicle: { seating: 4, mileage: 15, fuel: "petrol", emissions: 120 } },
-    { name: "Rahul", avatar: "R", isDriver: true, vehicle: { seating: 5, mileage: 20, fuel: "diesel", emissions: 100 } },
-    { name: "Sarah K.", avatar: "SK", isDriver: false, vehicle: { seating: 4, mileage: 18, fuel: "petrol", emissions: 115 } },
-    { name: "Alex M.", avatar: "AM", isDriver: false, vehicle: { seating: 7, mileage: 12, fuel: "diesel", emissions: 150 } },
-  ],
-  route: {
-    from: "Koramangala",
-    to: "Electronic City",
-    distance: "12 km",
-  },
-  schedule: {
-    time: "9:00 AM",
-    days: "Weekdays",
-    nextTrip: "Tomorrow, 9:00 AM",
-  },
-  transportMode: "car",
-  activityFeed: [
-    { from: "System", message: "Rahul will drive tomorrow.", time: "6:10 PM" },
-    { from: "Sarah K.", message: "Perfect, see you then!", time: "6:15 PM" },
-    { from: "You", message: "Sounds good!", time: "6:18 PM" },
-  ],
-  decision: {
-    status: "pending", // 'pending', 'decided'
-    options: [
-        { type: 'personal_vehicle', label: 'Use Personal Vehicle', emissions: '1.2kg CO2', cost: '₹150', suggested: true, driver: "Rahul" },
-        { type: 'shared_ride', label: 'Book a Ride', emissions: '1.5kg CO2', cost: '₹320', suggested: false },
-        { type: 'public_transport', label: 'Use Public Transport', emissions: '0.4kg CO2', cost: '₹80', suggested: false },
-    ],
-    confirmedOption: null,
-  }
-};
+import { mockGroupDetail } from "@/services/mockData";
 
 const EcoMoovGroup = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [group, setGroup] = useState(mockGroup);
+  const [group, setGroup] = useState(mockGroupDetail);
   const [newMessage, setNewMessage] = useState("");
 
   const handleSendMessage = () => {
@@ -62,9 +28,9 @@ const EcoMoovGroup = () => {
   };
 
   const handleBookingComplete = () => {
-      setGroup(prev => ({
-        ...prev,
-        activityFeed: [...prev.activityFeed, { from: 'System', message: 'Ride booked successfully!', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }]
+    setGroup(prev => ({
+      ...prev,
+      activityFeed: [...prev.activityFeed, { from: 'System', message: 'Ride booked successfully!', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }]
     }));
   }
 
@@ -106,65 +72,65 @@ const EcoMoovGroup = () => {
 
         {/* Schedule */}
         <GlassCard className="p-3 flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-                <Calendar size={16} className="text-primary" />
-                <div>
-                    <p className="text-xs text-muted-foreground">{group.schedule.days} at {group.schedule.time}</p>
-                    <p className="text-xs font-semibold">Next trip: {group.schedule.nextTrip}</p>
-                </div>
+          <div className="flex items-center gap-3">
+            <Calendar size={16} className="text-primary" />
+            <div>
+              <p className="text-xs text-muted-foreground">{group.schedule.days} at {group.schedule.time}</p>
+              <p className="text-xs font-semibold">Next trip: {group.schedule.nextTrip}</p>
             </div>
-            {driver && (
-                <div className="text-right">
-                    <p className="text-xs flex items-center gap-1.5 justify-end"><Car size={12} className="text-primary"/> Driver</p>
-                    <p className="text-xs font-semibold">{driver.name}</p>
-                </div>
-            )}
+          </div>
+          {driver && (
+            <div className="text-right">
+              <p className="text-xs flex items-center gap-1.5 justify-end"><Car size={12} className="text-primary" /> Driver</p>
+              <p className="text-xs font-semibold">{driver.name}</p>
+            </div>
+          )}
         </GlassCard>
 
         {/* Decision Component / Booking */}
         {group.decision.status === 'pending' && <GroupDecision decision={group.decision} setGroup={setGroup} />}
         {group.decision.status === 'decided' && group.decision.confirmedOption === 'shared_ride' && (
-            <GlassCard className="mb-4"><SimulatedRideBooking distance={group.route.distance} onComplete={handleBookingComplete}/></GlassCard>
+          <GlassCard className="mb-4"><SimulatedRideBooking distance={group.route.distance} onComplete={handleBookingComplete} /></GlassCard>
         )}
-        
+
         {/* Activity Feed */}
         <div className="h-[calc(100vh-450px)] flex flex-col">
-            <h2 className="font-display font-semibold mb-2 flex items-center gap-2"><MessageSquare size={16} className="text-primary"/> Activity</h2>
-            <div className="flex-1 overflow-y-auto pr-2 space-y-3">
-                <AnimatePresence>
-                {group.activityFeed.map((item, i) => (
-                    <motion.div 
-                        key={i} 
-                        className={`flex items-end gap-2 ${item.from === 'You' ? 'justify-end' : ''}`}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                    >
-                    {item.from !== 'You' && <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center text-xs font-bold self-start">{item.from.charAt(0)}</div>}
-                    <div className={`max-w-[75%] p-2.5 rounded-2xl ${item.from === 'You' ? 'bg-primary/20 rounded-br-md' : 'bg-secondary rounded-bl-md'}`}>
-                        <p className="text-xs">{item.message}</p>
-                        <p className={`text-[10px] mt-1 ${item.from === 'You' ? 'text-right' : 'text-left'} text-muted-foreground/70`}>{item.time}</p>
-                    </div>
-                    </motion.div>
-                ))}
-                </AnimatePresence>
-            </div>
+          <h2 className="font-display font-semibold mb-2 flex items-center gap-2"><MessageSquare size={16} className="text-primary" /> Activity</h2>
+          <div className="flex-1 overflow-y-auto pr-2 space-y-3">
+            <AnimatePresence>
+              {group.activityFeed.map((item, i) => (
+                <motion.div
+                  key={i}
+                  className={`flex items-end gap-2 ${item.from === 'You' ? 'justify-end' : ''}`}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  {item.from !== 'You' && <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center text-xs font-bold self-start">{item.from.charAt(0)}</div>}
+                  <div className={`max-w-[75%] p-2.5 rounded-2xl ${item.from === 'You' ? 'bg-primary/20 rounded-br-md' : 'bg-secondary rounded-bl-md'}`}>
+                    <p className="text-xs">{item.message}</p>
+                    <p className={`text-[10px] mt-1 ${item.from === 'You' ? 'text-right' : 'text-left'} text-muted-foreground/70`}>{item.time}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
 
-            {/* Message Input */}
-            <div className="mt-auto pt-2">
-                <GlassCard variant="strong" className="flex items-center gap-2 p-1.5">
-                <input
-                    type="text"
-                    placeholder="Type a message..."
-                    value={newMessage}
-                    onChange={e => setNewMessage(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
-                    className="flex-1 bg-transparent text-sm outline-none px-2 text-foreground placeholder:text-muted-foreground"
-                />
-                <GlassButton size="icon" onClick={handleSendMessage}>
-                    <Send size={16} />
-                </GlassButton>
-                </GlassCard>
-            </div>
+          {/* Message Input */}
+          <div className="mt-auto pt-2">
+            <GlassCard variant="strong" className="flex items-center gap-2 p-1.5">
+              <input
+                type="text"
+                placeholder="Type a message..."
+                value={newMessage}
+                onChange={e => setNewMessage(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
+                className="flex-1 bg-transparent text-sm outline-none px-2 text-foreground placeholder:text-muted-foreground"
+              />
+              <GlassButton size="icon" onClick={handleSendMessage}>
+                <Send size={16} />
+              </GlassButton>
+            </GlassCard>
+          </div>
         </div>
 
       </div>

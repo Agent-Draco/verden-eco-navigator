@@ -5,6 +5,7 @@ import { AppProvider } from "@/contexts/AppContext";
 import AuthLayout from "@/components/verden/AuthLayout";
 
 const Home = lazy(() => import("@/pages/Home"));
+const Index = lazy(() => import("@/pages/Index"));
 const Navigation = lazy(() => import("@/pages/Navigation"));
 const TripSummary = lazy(() => import("@/pages/TripSummary"));
 const Profile = lazy(() => import("@/pages/Profile"));
@@ -24,7 +25,11 @@ const PrivacyPolicy = lazy(() => import("@/pages/PrivacyPolicy"));
 const App = () => {
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <Suspense fallback={null}>
+      <Suspense fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      }>
         <AuthProvider>
           <AppProvider>
             <Routes>

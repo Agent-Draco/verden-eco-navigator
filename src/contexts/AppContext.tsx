@@ -79,12 +79,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [state, setState] = useState<AppState>(() => {
     const saved = localStorage.getItem("verden_app");
     if (saved) {
-        try {
-            return { ...defaultState, ...JSON.parse(saved) };
-        } catch (e) {
-            console.error("Failed to parse app state from local storage. Resetting to default.", e);
-            localStorage.removeItem("verden_app");
-        }
+      try {
+        return { ...defaultState, ...JSON.parse(saved) };
+      } catch (e) {
+        console.error("Failed to parse app state from local storage. Resetting to default.", e);
+        localStorage.removeItem("verden_app");
+      }
     }
     return defaultState;
   });
@@ -99,7 +99,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
           .select('*')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false });
-          
+
         const mappedTxs = txs?.map((t: any) => ({
           id: t.id,
           label: t.label,
@@ -107,7 +107,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
           type: t.type,
           date: new Date(t.created_at).toLocaleDateString(),
         })) || [];
-        
+
         // Fetch user's historical trips to aggregate impact stats
         const { data: trips } = await supabase
           .from('trips')
@@ -119,12 +119,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         let streakCount = 0;
 
         if (trips && trips.length > 0) {
-            tTrips = trips.length;
-            sumCO2 = trips.reduce((acc, curr) => acc + (Number(curr.co2_saved) || 0), 0);
-            
-            // Calculate general active streak by counting unique days driven
-            const days = new Set(trips.map(t => new Date(t.departure_time || t.created_at).toDateString()));
-            streakCount = days.size;
+          tTrips = trips.length;
+          sumCO2 = trips.reduce((acc, curr) => acc + (Number(curr.co2_saved) || 0), 0);
+
+          // Calculate general active streak by counting unique days driven
+          const days = new Set(trips.map(t => new Date(t.departure_time || t.created_at).toDateString()));
+          streakCount = days.size;
         }
 
         setState((prev) => ({
@@ -134,10 +134,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
           ecoScore: user.eco_score !== undefined ? user.eco_score : prev.ecoScore,
           totalTrips: tTrips > 0 ? tTrips : prev.totalTrips,
           totalCO2Saved: sumCO2 > 0 ? Number(sumCO2.toFixed(1)) : prev.totalCO2Saved,
-          streak: streakCount > 0 ? streakCount : prev.streak, 
+          streak: streakCount > 0 ? streakCount : prev.streak,
         }));
       };
-      
+
       fetchUserData();
     }
   }, [user]);
@@ -150,11 +150,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const persistTransaction = async (amount: number, label: string, type: 'earn' | 'spend', newTotalCredits: number) => {
     if (!user) return;
     try {
-      await supabase.from('transactions').insert([{ 
-        user_id: user.id, 
-        label, 
-        amount: Math.abs(amount), 
-        type 
+      await supabase.from('transactions').insert([{
+        user_id: user.id,
+        label,
+        amount: Math.abs(amount),
+        type
       }]);
       await supabase.from('users').update({ credits: newTotalCredits }).eq('id', user.id);
     } catch (e) {
@@ -237,7 +237,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   const setTheme = (t: "default" | "dark" | "neon") => save({ ...state, theme: t });
   const setAvatar = (id: number) => save({ ...state, selectedAvatar: id });
-  const setLastGreenestRoute = (route: any, isGreenest: boolean) => save({ ...state, lastGreenestRoute: {...route, isGreenest} });
+  const setLastGreenestRoute = (route: any, isGreenest: boolean) => save({ ...state, lastGreenestRoute: { ...route, isGreenest } });
 
   const unlockAvatar = (id: number) => {
     if (state.unlockedAvatars.includes(id)) return true;

@@ -27,7 +27,7 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     allowedHosts: ["verden-maps.onrender.com"],
     hmr: {
-      overlay: false,
+      overlay: true,
     },
   },
   preview: {
@@ -45,5 +45,8 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
+  },
+  optimizeDeps: {
+    include: ["maplibre-gl", "lucide-react"],
   },
 }));

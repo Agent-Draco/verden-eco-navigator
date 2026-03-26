@@ -15,7 +15,7 @@ const BottomNav = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-[100] safe-bottom">
+    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-[100] safe-bottom md:hidden">
       <div className="glass-strong mx-4 mb-4 rounded-2xl px-1 py-3 flex justify-around items-center">
         {navItems.map(({ icon: Icon, label, path }) => {
           const active = location.pathname === path;

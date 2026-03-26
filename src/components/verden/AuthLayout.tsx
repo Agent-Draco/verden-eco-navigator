@@ -17,11 +17,18 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
   }, [user, loading, navigate]);
 
   if (loading) {
-    return <>{children}</>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
+  if (!user) {
+    return null;
+  }
 
-  return user ? <>{children}</> : null;
+  return <>{children}</>;
 };
 
 export default AuthLayout;

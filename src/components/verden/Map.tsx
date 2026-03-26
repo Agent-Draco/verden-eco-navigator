@@ -1,8 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTheme } from '@/components/theme-provider';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-import 'leaflet-rotatedmarker';
+import { Map as MapLibre, Marker, LngLatBounds, NavigationControl } from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import { Navigation2 } from 'lucide-react';
 
 interface MapProps {
   destination?: any;
@@ -24,172 +24,220 @@ const Map = ({
   const currentTheme = theme === 'system' ? systemTheme : theme;
 
   const mapRef = useRef<HTMLDivElement | null>(null);
-  const mapInstance = useRef<L.Map | null>(null);
-  const userMarker = useRef<any>(null);
-  const destinationMarker = useRef<L.Marker | null>(null);
-  const routeLayers = useRef<L.Layer[]>([]);
-  const tileLayerRef = useRef<L.TileLayer | null>(null);
+  const mapInstance = useRef<MapLibre | null>(null);
+  const userMarker = useRef<Marker | null>(null);
+  const destinationMarker = useRef<Marker | null>(null);
+  const [isFollowMode, setIsFollowMode] = useState(true);
+  const hasFittedRef = useRef(false);
 
   // ── Initialize map ────────────────────────────────────────────────────────
   useEffect(() => {
     if (!mapInstance.current && mapRef.current) {
-      mapInstance.current = L.map(mapRef.current, {
-        center: [51.505, -0.09],
+      mapInstance.current = new MapLibre({
+        container: mapRef.current,
+        style: {
+          version: 8,
+          sources: {
+            'raster-tiles': {
+              type: 'raster',
+              tiles: [
+                currentTheme === 'dark'
+                  ? 'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png'
+                  : 'https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
+              ],
+              tileSize: 256,
+              attribution: '&copy; OpenStreetMap &copy; CARTO',
+            },
+          },
+          layers: [
+            {
+              id: 'simple-tiles',
+              type: 'raster',
+              source: 'raster-tiles',
+              minzoom: 0,
+              maxzoom: 22,
+            },
+          ],
+        },
+        center: userLocation ? [userLocation[1], userLocation[0]] : [77.1000, 28.5562], // Delhi fallback
         zoom: 15,
-        zoomControl: false,
+        pitch: 60,
+        bearing: bearing,
       });
 
-      const initialTileUrl =
-        currentTheme === 'dark'
-          ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-          : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+      mapInstance.current.addControl(new NavigationControl(), 'top-right');
 
-      tileLayerRef.current = L.tileLayer(initialTileUrl, {
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      }).addTo(mapInstance.current);
+      // Add branding watermark
+      const logoDiv = document.createElement('div');
+      logoDiv.className = 'verden-watermark';
+      logoDiv.innerHTML = '<span style="font-weight:bold; color:#22c55e;">Verden</span> Maps';
+      logoDiv.style.position = 'absolute';
+      logoDiv.style.bottom = '10px';
+      logoDiv.style.right = '10px';
+      logoDiv.style.backgroundColor = 'rgba(255,255,255,0.7)';
+      logoDiv.style.padding = '2px 8px';
+      logoDiv.style.borderRadius = '4px';
+      logoDiv.style.fontSize = '12px';
+      logoDiv.style.pointerEvents = 'none';
+      mapRef.current.appendChild(logoDiv);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
-  // ── Theme: swap tile layer ─────────────────────────────────────────────────
-  useEffect(() => {
-    if (tileLayerRef.current) {
-      const tileUrl =
-        currentTheme === 'dark'
-          ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-          : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-      tileLayerRef.current.setUrl(tileUrl);
-    }
+    return () => {
+      if (mapInstance.current) {
+        mapInstance.current.remove();
+        mapInstance.current = null;
+      }
+    };
   }, [currentTheme]);
 
-  // ── MAP ROTATION via CSS ───────────────────────────────────────────────────
-  // Rotate the map container opposite to bearing so forward is always "up".
+  // ── Follow User ───────────────────────────────────────────────────────────
   useEffect(() => {
-    if (mapRef.current) {
-      mapRef.current.style.transform = `rotate(${-bearing}deg)`;
-      // Force Leaflet to recalculate element sizes after transform
-      mapInstance.current?.invalidateSize();
-    }
-  }, [bearing]);
+    if (!mapInstance.current || !userLocation || !isFollowMode) return;
 
-  // ── User location + vehicle marker ────────────────────────────────────────
-  useEffect(() => {
-    if (!userLocation || !mapInstance.current) return;
-
-    const wazeCarHtml = `
-      <div style="width: 48px; height: 48px;">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-          <defs>
-            <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="6" stdDeviation="4" flood-opacity="0.4"/>
-            </filter>
-            <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="#3b82f6" />
-              <stop offset="100%" stop-color="#1e3a8a" />
-            </linearGradient>
-          </defs>
-          <g filter="url(#shadow)">
-            <rect x="25" y="15" width="10" height="20" rx="4" fill="#1f2937"/>
-            <rect x="65" y="15" width="10" height="20" rx="4" fill="#1f2937"/>
-            <rect x="25" y="65" width="10" height="20" rx="4" fill="#1f2937"/>
-            <rect x="65" y="65" width="10" height="20" rx="4" fill="#1f2937"/>
-            <rect x="30" y="10" width="40" height="80" rx="16" fill="url(#bodyGrad)" stroke="#93c5fd" stroke-width="2"/>
-            <path d="M 34 35 Q 50 28 66 35 L 61 50 L 39 50 Z" fill="#0f172a" opacity="0.8"/>
-            <path d="M 34 70 Q 50 78 66 70 L 61 55 L 39 55 Z" fill="#0f172a" opacity="0.8"/>
-            <circle cx="38" cy="16" r="4.5" fill="#fef08a"/>
-            <circle cx="62" cy="16" r="4.5" fill="#fef08a"/>
-            <rect x="35" y="85" width="8" height="4" rx="2" fill="#ef4444"/>
-            <rect x="57" y="85" width="8" height="4" rx="2" fill="#ef4444"/>
-          </g>
-        </svg>
-      </div>
-    `;
-
-    const carIcon = L.divIcon({
-      html: wazeCarHtml,
-      className: 'waze-car-icon bg-transparent border-0',
-      iconSize: [48, 48],
-      iconAnchor: [24, 24],
+    mapInstance.current.easeTo({
+      center: [userLocation[1], userLocation[0]],
+      bearing: bearing,
+      duration: 1000,
+      pitch: 60,
     });
+  }, [userLocation, bearing, isFollowMode]);
+
+  // ── Update User Marker (Waze style) ───────────────────────────────────────
+  useEffect(() => {
+    if (!mapInstance.current || !userLocation) return;
+
+    const el = document.createElement('div');
+    el.className = 'user-marker-waze';
+    el.style.width = '40px';
+    el.style.height = '40px';
+    
+    // Waze-like car avatar (SVG)
+    const wazeCarHtml = `
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: rotate(${bearing}deg); transition: transform 0.3s ease-out;">
+        <circle cx="20" cy="20" r="18" fill="rgba(34, 197, 94, 0.2)" stroke="#22c55e" stroke-width="2"/>
+        <path d="M20 10L26 26L20 23L14 26L20 10Z" fill="#22c55e" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+      </svg>
+    `;
+    el.innerHTML = wazeCarHtml;
 
     if (!userMarker.current) {
-      userMarker.current = L.marker(userLocation, {
-        icon: carIcon,
-        // Keep car upright — map container rotates instead
-        rotationAngle: 0,
-        rotationOrigin: 'center center',
-      } as any).addTo(mapInstance.current);
+      userMarker.current = new Marker({
+        element: el,
+        rotationAlignment: 'map',
+      })
+        .setLngLat([userLocation[1], userLocation[0]])
+        .addTo(mapInstance.current);
     } else {
-      userMarker.current.setLatLng(userLocation);
+      userMarker.current.setLngLat([userLocation[1], userLocation[0]]);
+      const svg = userMarker.current.getElement().querySelector('svg');
+      if (svg) svg.style.transform = `rotate(${bearing}deg)`;
+    }
+  }, [userLocation, bearing]);
+
+  // ── Handle Destination Selection ──────────────────────────────────────────
+  useEffect(() => {
+    if (!mapInstance.current || !destination) return;
+
+    const coords: [number, number] = [
+      destination.geometry.coordinates[0],
+      destination.geometry.coordinates[1],
+    ];
+    if (!destinationMarker.current) {
+      destinationMarker.current = new Marker({ color: '#ef4444' })
+        .setLngLat(coords)
+        .addTo(mapInstance.current);
+    } else {
+      destinationMarker.current.setLngLat(coords);
     }
 
-    // Always center on user with smooth animation
-    mapInstance.current.setView(userLocation, 16, { animate: true });
-  }, [userLocation]);
-
-  // ── Destination marker ────────────────────────────────────────────────────
-  useEffect(() => {
-    if (destination && mapInstance.current) {
-      const coords: [number, number] = [
-        destination.geometry.coordinates[1],
-        destination.geometry.coordinates[0],
-      ];
-      if (!destinationMarker.current) {
-        destinationMarker.current = L.marker(coords).addTo(mapInstance.current);
-      } else {
-        destinationMarker.current.setLatLng(coords);
-      }
+    if (!isFollowMode) {
+      mapInstance.current.flyTo({
+        center: coords,
+        zoom: 14,
+        essential: true
+      });
     }
   }, [destination]);
 
-  // ── Route polylines ───────────────────────────────────────────────────────
+  // ── Show Routes ───────────────────────────────────────────────────────────
   useEffect(() => {
-    if (!mapInstance.current) return;
-    routeLayers.current.forEach((layer) => mapInstance.current!.removeLayer(layer));
-    routeLayers.current = [];
+    if (!mapInstance.current || (!fastestRoute && !greenestRoute)) return;
 
-    const drawRoute = (route: any, color: string, weight: number, opacity: number) => {
-      const polyline = L.geoJSON(route.geometry, {
-        style: { color, weight, opacity },
-      }).addTo(mapInstance.current!);
-      routeLayers.current.push(polyline);
-    };
+    const map = mapInstance.current;
+    
+    // Clean up existing routes
+    ['fastest-route', 'greenest-route'].forEach(id => {
+      if (map.getLayer(id)) map.removeLayer(id);
+      if (map.getSource(id)) map.removeSource(id);
+    });
 
-    if (fastestRoute && greenestRoute && fastestRoute.id === greenestRoute.id) {
-      drawRoute(greenestRoute, '#10b981', 7, 0.9);
+    if (fastestRoute) {
+      map.addSource('fastest-route', {
+        type: 'geojson',
+        data: fastestRoute.geometry,
+      });
+      map.addLayer({
+        id: 'fastest-route',
+        type: 'line',
+        source: 'fastest-route',
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: { 'line-color': '#3b82f6', 'line-width': 6 },
+      });
+    }
+  }, [fastestRoute, greenestRoute]);
+
+  // ── Fit Bounds on Route Selection ─────────────────────────────────────────
+  useEffect(() => {
+    if ((fastestRoute || greenestRoute) && userLocation && destination && isFollowMode && mapInstance.current) {
+      if (!hasFittedRef.current) {
+        const bounds = new LngLatBounds();
+        bounds.extend([userLocation[1], userLocation[0]]);
+        bounds.extend([destination.geometry.coordinates[0], destination.geometry.coordinates[1]]);
+        mapInstance.current.fitBounds(bounds, { padding: 80, duration: 1500 });
+        hasFittedRef.current = true;
+      }
     } else {
-      if (fastestRoute) drawRoute(fastestRoute, '#3b82f6', 6, 0.8);
-      if (greenestRoute) drawRoute(greenestRoute, '#10b981', 6, 0.9);
+      hasFittedRef.current = false;
     }
+  }, [fastestRoute, greenestRoute, destination, userLocation, isFollowMode]);
 
-    if ((fastestRoute || greenestRoute) && userLocation && destination) {
-      const bounds = L.latLngBounds(userLocation, [
-        destination.geometry.coordinates[1],
-        destination.geometry.coordinates[0],
-      ]);
-      mapInstance.current.fitBounds(bounds, { padding: [50, 50] });
-    }
-  }, [fastestRoute, greenestRoute, userLocation, destination]);
+  // ── Handle Resize ────────────────────────────────────────────────────────
+  useEffect(() => {
+    const handleResize = () => {
+      if (mapInstance.current) {
+        mapInstance.current.resize();
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
-    <div
-      className="absolute inset-0 z-0 overflow-hidden"
-      style={{ transformOrigin: 'center center' }}
-    >
-      <div
-        ref={mapRef}
-        className="absolute inset-0"
-        style={{
-          transition: 'transform 0.3s ease',
-          // Slightly over-size so edges don't show when rotated
-          width: '140%',
-          height: '140%',
-          top: '-20%',
-          left: '-20%',
-          transformOrigin: 'center center',
-        }}
-      />
+    <div className="absolute inset-0 w-full h-full overflow-hidden">
+      <div ref={mapRef} className="w-full h-full" />
+      
+      {!isFollowMode && (
+        <button
+          onClick={() => setIsFollowMode(true)}
+          className="absolute bottom-24 md:bottom-10 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-6 py-2 rounded-full shadow-lg flex items-center gap-2 font-medium z-10 hover:bg-primary/90 transition-all active:scale-95"
+        >
+          <Navigation2 size={18} />
+          Recenter
+        </button>
+      )}
+
+      {/* Map specific styles */}
+      <style>{`
+        .maplibregl-ctrl-bottom-right { display: none; }
+        .maplibregl-ctrl-bottom-left { display: none; }
+        .maplibregl-canvas { 
+          width: 100% !important; 
+          height: 100% !important;
+          filter: saturate(1.2) contrast(1.05) brightness(0.95);
+        }
+        .verden-watermark { z-index: 1; opacity: 0.8; }
+        .user-marker-waze { cursor: pointer; }
+      `}</style>
     </div>
   );
 };
