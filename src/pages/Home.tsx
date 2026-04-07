@@ -5,7 +5,6 @@ import { Search, Zap, Leaf, Clock, Navigation2, MapPin, Car, Bike, Bus } from "l
 import GlassCard from "@/components/verden/GlassCard";
 import GlassButton from "@/components/verden/GlassButton";
 import Map from "@/components/verden/Map";
-import BottomNav from "@/components/verden/BottomNav";
 import { useApp } from "@/contexts/AppContext";
 import verdenLogo from "@/assets/verden-logo.png";
 import { searchPlaces } from "@/services/nominatim";
@@ -65,6 +64,7 @@ const Home = () => {
             const results = await searchPlaces(query, userLocation);
             setSuggestions(results || []);
             setShowSuggestions(true);
+            setShowRoutes(false);
         } finally {
             setIsSearching(false);
         }
@@ -121,7 +121,7 @@ const Home = () => {
   const co2Difference = fastestRoute && greenestRoute ? parseFloat((fastestRoute.co2 - greenestRoute.co2).toFixed(1)) : 0;
 
   return (
-    <div className="w-screen h-screen relative bg-background overflow-hidden">
+    <div className="w-full h-full relative overflow-hidden">
       {/* Background Map */}
       <Map 
         userLocation={userLocation}
@@ -359,8 +359,6 @@ const Home = () => {
           </motion.div>
         )}
       </AnimatePresence>
-
-      <BottomNav />
     </div>
   );
 };

@@ -20,6 +20,7 @@ const VehicleSetup = lazy(() => import("@/pages/VehicleSetup"));
 const Customize = lazy(() => import("@/pages/Customize"));
 const TermsAndConditions = lazy(() => import("@/pages/TermsAndConditions"));
 const PrivacyPolicy = lazy(() => import("@/pages/PrivacyPolicy"));
+const Resources = lazy(() => import("@/pages/Resources"));
 
 
 const App = () => {
@@ -49,6 +50,7 @@ const App = () => {
               <Route path="/wallet" element={<AuthLayout><Wallet /></AuthLayout>} />
               <Route path="/vehicle" element={<AuthLayout><VehicleSetup /></AuthLayout>} />
               <Route path="/customize" element={<AuthLayout><Customize /></AuthLayout>} />
+              <Route path="/resources" element={<AuthLayout><Resources /></AuthLayout>} />
             </Routes>
           </AppProvider>
         </AuthProvider>

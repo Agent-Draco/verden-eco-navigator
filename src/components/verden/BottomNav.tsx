@@ -1,12 +1,12 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Map, Leaf, Users, Wallet, User } from "lucide-react";
+import { Map, Leaf, Users, BookOpen, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { icon: Map, label: "Map", path: "/home" },
   { icon: Leaf, label: "Eco", path: "/credits" },
   { icon: Users, label: "Groups", path: "/ecomoov" },
-  { icon: Wallet, label: "Wallet", path: "/wallet" },
+  { icon: BookOpen, label: "Library", path: "/resources" },
   { icon: User, label: "Profile", path: "/profile" },
 ];
 

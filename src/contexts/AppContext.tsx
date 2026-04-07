@@ -8,11 +8,13 @@ interface AppState {
   streak: number;
   totalTrips: number;
   totalCO2Saved: number;
-  tier: string;
-  theme: "default" | "dark" | "neon";
+  tier: "Bronze" | "Silver" | "Gold";
+  theme: string;
   selectedAvatar: number;
   unlockedAvatars: number[];
   unlockedThemes: string[];
+  selectedVehicle: { model: string; color: string };
+  unlockedVehicles: string[];
   badges: { name: string; earned: boolean }[];
   transactions: { id: number; label: string; amount: number; date: string; type: "earn" | "spend" }[];
   joinedGroups: string[];
@@ -25,10 +27,12 @@ interface AppContextType extends AppState {
   spendCredits: (amount: number, label: string) => boolean;
   completeTrip: (co2Saved: number, creditsEarned: number) => void;
   joinGroup: (name: string) => void;
-  setTheme: (t: "default" | "dark" | "neon") => void;
+  setTheme: (t: string) => void;
   setAvatar: (id: number) => void;
   unlockAvatar: (id: number) => boolean;
   unlockTheme: (t: string) => boolean;
+  setVehicle: (model: string, color: string) => void;
+  unlockVehicle: (model: string, cost: number) => boolean;
   completeVehicleSetup: () => void;
   setLastGreenestRoute: (route: any, isGreenest: boolean) => void;
   showReward: string | null;
@@ -36,31 +40,20 @@ interface AppContextType extends AppState {
 }
 
 const defaultState: AppState = {
-  credits: 240,
-  ecoScore: 82,
-  streak: 7,
-  totalTrips: 42,
-  totalCO2Saved: 18.4,
+  credits: 0,
+  ecoScore: 0,
+  streak: 0,
+  totalTrips: 0,
+  totalCO2Saved: 0,
   tier: "Bronze",
   theme: "default",
   selectedAvatar: 0,
-  unlockedAvatars: [0, 1, 2],
+  unlockedAvatars: [0],
   unlockedThemes: ["default"],
-  badges: [
-    { name: "First Ride", earned: true },
-    { name: "10 Eco Trips", earned: true },
-    { name: "CO₂ Saver", earned: true },
-    { name: "Group Rider", earned: false },
-    { name: "100 Credits", earned: false },
-    { name: "Streak King", earned: false },
-  ],
-  transactions: [
-    { id: 1, label: "Green Route Bonus", amount: 15, date: "Today", type: "earn" },
-    { id: 2, label: "Eco Trip Complete", amount: 10, date: "Today", type: "earn" },
-    { id: 3, label: "EcoMoov Group Bonus", amount: 8, date: "Yesterday", type: "earn" },
-    { id: 4, label: "Avatar Unlock", amount: -50, date: "2 days ago", type: "spend" },
-    { id: 5, label: "Streak Reward", amount: 20, date: "3 days ago", type: "earn" },
-  ],
+  selectedVehicle: { model: 'sedan', color: '#22c55e' },
+  unlockedVehicles: ['sedan', 'suv', 'bike'],
+  badges: [],
+  transactions: [],
   joinedGroups: [],
   vehicleSetup: false,
   lastGreenestRoute: null,
@@ -79,16 +72,24 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [state, setState] = useState<AppState>(() => {
     const saved = localStorage.getItem("verden_app");
     if (saved) {
-      try {
-        return { ...defaultState, ...JSON.parse(saved) };
-      } catch (e) {
-        console.error("Failed to parse app state from local storage. Resetting to default.", e);
-        localStorage.removeItem("verden_app");
-      }
+        try {
+            return { ...defaultState, ...JSON.parse(saved) };
+        } catch (e) {
+            console.error("Failed to parse app state from local storage. Resetting to default.", e);
+            localStorage.removeItem("verden_app");
+        }
     }
     return defaultState;
   });
   const [showReward, setShowReward] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Automatic Tier Calculation
+    const newTier = state.credits >= 1000 ? "Gold" : state.credits >= 300 ? "Silver" : "Bronze";
+    if (newTier !== state.tier) {
+      save({ ...state, tier: newTier });
+    }
+  }, [state.credits]);
 
   useEffect(() => {
     if (user) {
@@ -99,7 +100,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
           .select('*')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false });
-
+          
         const mappedTxs = txs?.map((t: any) => ({
           id: t.id,
           label: t.label,
@@ -107,7 +108,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
           type: t.type,
           date: new Date(t.created_at).toLocaleDateString(),
         })) || [];
-
+        
         // Fetch user's historical trips to aggregate impact stats
         const { data: trips } = await supabase
           .from('trips')
@@ -119,12 +120,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         let streakCount = 0;
 
         if (trips && trips.length > 0) {
-          tTrips = trips.length;
-          sumCO2 = trips.reduce((acc, curr) => acc + (Number(curr.co2_saved) || 0), 0);
-
-          // Calculate general active streak by counting unique days driven
-          const days = new Set(trips.map(t => new Date(t.departure_time || t.created_at).toDateString()));
-          streakCount = days.size;
+            tTrips = trips.length;
+            sumCO2 = trips.reduce((acc, curr) => acc + (Number(curr.co2_saved) || 0), 0);
+            
+            // Calculate general active streak by counting unique days driven
+            const days = new Set(trips.map(t => new Date(t.departure_time || t.created_at).toDateString()));
+            streakCount = days.size;
         }
 
         setState((prev) => ({
@@ -134,10 +135,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
           ecoScore: user.eco_score !== undefined ? user.eco_score : prev.ecoScore,
           totalTrips: tTrips > 0 ? tTrips : prev.totalTrips,
           totalCO2Saved: sumCO2 > 0 ? Number(sumCO2.toFixed(1)) : prev.totalCO2Saved,
-          streak: streakCount > 0 ? streakCount : prev.streak,
+          streak: streakCount > 0 ? streakCount : prev.streak, 
         }));
       };
-
+      
       fetchUserData();
     }
   }, [user]);
@@ -150,11 +151,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const persistTransaction = async (amount: number, label: string, type: 'earn' | 'spend', newTotalCredits: number) => {
     if (!user) return;
     try {
-      await supabase.from('transactions').insert([{
-        user_id: user.id,
-        label,
-        amount: Math.abs(amount),
-        type
+      await supabase.from('transactions').insert([{ 
+        user_id: user.id, 
+        label, 
+        amount: Math.abs(amount), 
+        type 
       }]);
       await supabase.from('users').update({ credits: newTotalCredits }).eq('id', user.id);
     } catch (e) {
@@ -235,9 +236,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setShowReward(`+${bonus} bonus credits for joining!`);
   };
 
-  const setTheme = (t: "default" | "dark" | "neon") => save({ ...state, theme: t });
+  const setTheme = (t: string) => save({ ...state, theme: t });
   const setAvatar = (id: number) => save({ ...state, selectedAvatar: id });
-  const setLastGreenestRoute = (route: any, isGreenest: boolean) => save({ ...state, lastGreenestRoute: { ...route, isGreenest } });
+  const setVehicle = (model: string, color: string) => save({ ...state, selectedVehicle: { model, color } });
+  const setLastGreenestRoute = (route: any, isGreenest: boolean) => save({ ...state, lastGreenestRoute: {...route, isGreenest} });
 
   const unlockAvatar = (id: number) => {
     if (state.unlockedAvatars.includes(id)) return true;
@@ -266,14 +268,33 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       ...state,
       credits: newTotal,
       unlockedThemes: [...state.unlockedThemes, t],
-      theme: t as AppState["theme"],
+      theme: t,
       transactions: [
         { id: Date.now() as any, label: "Theme Unlock", amount: -100, date: "Just now", type: "spend" },
         ...state.transactions,
       ],
     });
     persistTransaction(100, "Theme Unlock", 'spend', newTotal);
-    setShowReward("New theme unlocked!");
+    setShowReward(`New theme "${t}" unlocked!`);
+    return true;
+  };
+
+  const unlockVehicle = (model: string, cost: number) => {
+    if (state.unlockedVehicles.includes(model)) return true;
+    if (state.credits < cost) return false;
+    const newTotal = state.credits - cost;
+    save({
+      ...state,
+      credits: newTotal,
+      unlockedVehicles: [...state.unlockedVehicles, model],
+      selectedVehicle: { ...state.selectedVehicle, model },
+      transactions: [
+        { id: Date.now() as any, label: "Vehicle Unlock", amount: -cost, date: "Just now", type: "spend" },
+        ...state.transactions,
+      ],
+    });
+    persistTransaction(cost, "Vehicle Unlock", 'spend', newTotal);
+    setShowReward(`New vehicle "${model}" unlocked!`);
     return true;
   };
 
@@ -305,6 +326,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setAvatar,
         unlockAvatar,
         unlockTheme,
+        setVehicle,
+        unlockVehicle,
         completeVehicleSetup,
         setLastGreenestRoute,
         showReward,

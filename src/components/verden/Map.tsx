@@ -1,31 +1,49 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, Suspense } from 'react';
 import { useTheme } from '@/components/theme-provider';
 import { Map as MapLibre, Marker, LngLatBounds, NavigationControl } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { Navigation2 } from 'lucide-react';
+import { useApp } from '@/contexts/AppContext';
+import { cn } from '@/lib/utils';
+import { Canvas } from '@react-three/fiber';
+import { PerspectiveCamera, Environment, ContactShadows } from '@react-three/drei';
+import Vehicle3D from './Vehicle3D';
+import { createPortal } from 'react-dom';
 
 interface MapProps {
   destination?: any;
   fastestRoute?: any;
   greenestRoute?: any;
+  activeRoute?: any;
   userLocation?: [number, number] | null;
   userHeading?: number;
   bearing?: number; // map rotation in degrees
+  speed?: number; // Added speed for dynamic camera
+  vehicle?: { model: string; color: string };
 }
 
 const Map = ({
   destination,
   fastestRoute,
   greenestRoute,
+  activeRoute,
   userLocation,
+  userHeading = 0,
   bearing = 0,
+  speed = 0,
+  vehicle: propVehicle,
 }: MapProps) => {
-  const { theme, systemTheme } = useTheme();
-  const currentTheme = theme === 'system' ? systemTheme : theme;
+  const { theme: appTheme, selectedVehicle: appVehicle } = useApp();
+  const { theme: uiTheme, systemTheme } = useTheme();
+  
+  const currentTheme = appTheme;
+  const resolvedUITheme = uiTheme === 'system' ? systemTheme : uiTheme;
+  const vehicle = propVehicle || appVehicle;
 
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstance = useRef<MapLibre | null>(null);
   const userMarker = useRef<Marker | null>(null);
+  const [vehiclePortal, setVehiclePortal] = useState<HTMLElement | null>(null);
   const destinationMarker = useRef<Marker | null>(null);
   const [isFollowMode, setIsFollowMode] = useState(true);
   const hasFittedRef = useRef(false);
@@ -41,7 +59,7 @@ const Map = ({
             'raster-tiles': {
               type: 'raster',
               tiles: [
-                currentTheme === 'dark'
+                currentTheme === 'dark' || currentTheme === 'neon' || currentTheme === 'phoenix' || currentTheme === 'ocean' || currentTheme === 'forest' || resolvedUITheme === 'dark'
                   ? 'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png'
                   : 'https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
               ],
@@ -94,45 +112,45 @@ const Map = ({
   useEffect(() => {
     if (!mapInstance.current || !userLocation || !isFollowMode) return;
 
+    // Dynamic Camera: Adjust pitch and zoom based on speed (Google Maps style)
+    const targetZoom = speed > 60 ? 14.5 : speed > 30 ? 15.5 : 17;
+    const targetPitch = speed > 50 ? 75 : 60;
+
     mapInstance.current.easeTo({
       center: [userLocation[1], userLocation[0]],
       bearing: bearing,
-      duration: 1000,
-      pitch: 60,
+      zoom: targetZoom,
+      pitch: targetPitch,
+      duration: 1200,
+      easing: (t) => t * (2 - t), // Smooth ease-out
     });
-  }, [userLocation, bearing, isFollowMode]);
+  }, [userLocation, bearing, isFollowMode, speed]);
 
-  // ── Update User Marker (Waze style) ───────────────────────────────────────
+  // ── Update User Marker (3D style) ───────────────────────────────────────
   useEffect(() => {
-    if (!mapInstance.current || !userLocation) return;
+    const map = mapInstance.current;
+    if (!map || !userLocation) return;
 
     const el = document.createElement('div');
-    el.className = 'user-marker-waze';
-    el.style.width = '40px';
-    el.style.height = '40px';
+    el.className = 'user-marker-3d';
+    el.style.width = '60px';
+    el.style.height = '60px';
+    el.style.pointerEvents = 'none';
     
-    // Waze-like car avatar (SVG)
-    const wazeCarHtml = `
-      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: rotate(${bearing}deg); transition: transform 0.3s ease-out;">
-        <circle cx="20" cy="20" r="18" fill="rgba(34, 197, 94, 0.2)" stroke="#22c55e" stroke-width="2"/>
-        <path d="M20 10L26 26L20 23L14 26L20 10Z" fill="#22c55e" stroke="white" stroke-width="2" stroke-linejoin="round"/>
-      </svg>
-    `;
-    el.innerHTML = wazeCarHtml;
+    setVehiclePortal(el);
 
     if (!userMarker.current) {
       userMarker.current = new Marker({
         element: el,
         rotationAlignment: 'map',
+        pitchAlignment: 'map',
       })
         .setLngLat([userLocation[1], userLocation[0]])
-        .addTo(mapInstance.current);
+        .addTo(map);
     } else {
       userMarker.current.setLngLat([userLocation[1], userLocation[0]]);
-      const svg = userMarker.current.getElement().querySelector('svg');
-      if (svg) svg.style.transform = `rotate(${bearing}deg)`;
     }
-  }, [userLocation, bearing]);
+  }, [userLocation, bearing, vehicle]);
 
   // ── Handle Destination Selection ──────────────────────────────────────────
   useEffect(() => {
@@ -161,34 +179,58 @@ const Map = ({
 
   // ── Show Routes ───────────────────────────────────────────────────────────
   useEffect(() => {
-    if (!mapInstance.current || (!fastestRoute && !greenestRoute)) return;
+    if (!mapInstance.current || (!fastestRoute && !greenestRoute && !activeRoute)) return;
 
     const map = mapInstance.current;
     
-    // Clean up existing routes
-    ['fastest-route', 'greenest-route'].forEach(id => {
-      if (map.getLayer(id)) map.removeLayer(id);
-      if (map.getSource(id)) map.removeSource(id);
-    });
+    // Function to add a high-fidelity 'Google' style route with layers
+    const addRoute = (id: string, geometry: any, color: string) => {
+      const casingId = `${id}-casing`;
+      const innerId = `${id}-inner`;
+      
+      // Cleanup
+      [casingId, innerId].forEach(lId => {
+        if (map.getLayer(lId)) map.removeLayer(lId);
+        if (map.getSource(lId)) map.removeSource(lId);
+      });
+      
+      map.addSource(id, { type: 'geojson', data: geometry });
 
-    if (fastestRoute) {
-      map.addSource('fastest-route', {
-        type: 'geojson',
-        data: fastestRoute.geometry,
-      });
+      // 1. Shadow/Casing Layer (Google Maps Navy)
       map.addLayer({
-        id: 'fastest-route',
+        id: casingId,
         type: 'line',
-        source: 'fastest-route',
+        source: id,
         layout: { 'line-join': 'round', 'line-cap': 'round' },
-        paint: { 'line-color': '#3b82f6', 'line-width': 6 },
+        paint: { 
+          'line-color': '#0d4a2e', // Deep forest/navy for depth
+          'line-width': ['interpolate', ['linear'], ['zoom'], 12, 12, 18, 24],
+          'line-opacity': 0.4,
+        },
       });
+
+      // 2. Vibrant Main Path
+      map.addLayer({
+        id: innerId,
+        type: 'line',
+        source: id,
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: { 
+          'line-color': color, 
+          'line-width': ['interpolate', ['linear'], ['zoom'], 12, 6, 18, 14],
+          'line-opacity': 1,
+        },
+      });
+    };
+
+    if (activeRoute) {
+      addRoute('active-route', activeRoute.geometry, '#22c55e'); // Verden Green
     }
-  }, [fastestRoute, greenestRoute]);
+  }, [fastestRoute, greenestRoute, activeRoute, currentTheme]);
 
   // ── Fit Bounds on Route Selection ─────────────────────────────────────────
   useEffect(() => {
-    if ((fastestRoute || greenestRoute) && userLocation && destination && isFollowMode && mapInstance.current) {
+    if ((fastestRoute || greenestRoute || activeRoute) && userLocation && destination && isFollowMode && mapInstance.current) {
       if (!hasFittedRef.current) {
         const bounds = new LngLatBounds();
         bounds.extend([userLocation[1], userLocation[0]]);
@@ -199,7 +241,7 @@ const Map = ({
     } else {
       hasFittedRef.current = false;
     }
-  }, [fastestRoute, greenestRoute, destination, userLocation, isFollowMode]);
+  }, [fastestRoute, greenestRoute, activeRoute, destination, userLocation, isFollowMode]);
 
   // ── Handle Resize ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -226,6 +268,25 @@ const Map = ({
         </button>
       )}
 
+      {/* Render the 3D Vehicle via Portal into the DOM marker element */}
+      {vehiclePortal && createPortal(
+        <div style={{ width: '80px', height: '80px' }}>
+          <Canvas camera={{ position: [0, 5, 0], fov: 30 }}>
+            <ambientLight intensity={2.0} />
+            <pointLight position={[0, 5, 0]} intensity={0.5} />
+            <Suspense fallback={null}>
+              <Vehicle3D 
+                model={vehicle.model} 
+                color={vehicle.color} 
+                rotation={userHeading} // Aligned to user heading in map space
+                scale={0.9} 
+              />
+            </Suspense>
+          </Canvas>
+        </div>,
+        vehiclePortal
+      )}
+
       {/* Map specific styles */}
       <style>{`
         .maplibregl-ctrl-bottom-right { display: none; }
@@ -233,10 +294,17 @@ const Map = ({
         .maplibregl-canvas { 
           width: 100% !important; 
           height: 100% !important;
-          filter: saturate(1.2) contrast(1.05) brightness(0.95);
+          filter: ${currentTheme === 'neon' ? 'saturate(2) contrast(1.2) brightness(1.1)' : 
+                   currentTheme === 'phoenix' ? 'sepia(0.3) saturate(2) hue-rotate(-20deg)' : 
+                   currentTheme === 'ocean' ? 'hue-rotate(20deg) saturate(1.5) contrast(1.1)' : 
+                   currentTheme === 'forest' ? 'hue-rotate(-40deg) saturate(1.5)' : 
+                   'saturate(1.2) contrast(1.05) brightness(0.95)'};
         }
         .verden-watermark { z-index: 1; opacity: 0.8; }
-        .user-marker-waze { cursor: pointer; }
+        .user-marker-3d { 
+          transform-style: preserve-3d;
+          perspective: 1000px;
+        }
       `}</style>
     </div>
   );

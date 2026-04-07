@@ -1,15 +1,13 @@
-# Run Commands for Verden Eco-Navigator
+# Verden Eco-Navigator — Run Commands
 
-Follow these steps to run the application in a development environment:
+To run the application locally:
 
-1. **Install Dependencies**
-   ```bash
-   npm install
-   ```
+```bash
+# Install dependencies (if needed)
+npm install
 
-2. **Run Development Server**
-   ```bash
-   npm run dev
-   ```
+# Start the development server
+npm run verdev
+```
 
-The application will be available at `http://localhost:8080`.
+The application will be available at `http://localhost:5173` (or the port specified in console).

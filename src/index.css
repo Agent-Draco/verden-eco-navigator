@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Grotesk:wght@300..700&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
 @layer base {
   :root {
@@ -92,6 +92,43 @@
     --verden-glass: 160 20% 12%;
     --verden-glass-border: 0 0% 100%;
     --verden-surface: 160 20% 6%;
+  }
+
+  /* --- Special Themes --- */
+
+  .neon {
+    --primary: 140 100% 55%;
+    --accent: 180 100% 50%;
+    --verden-neon: 140 100% 55%;
+    --verden-electric: 180 100% 55%;
+    --ring: 140 100% 55%;
+  }
+
+  .phoenix {
+    --primary: 15 100% 55%;
+    --accent: 45 100% 50%;
+    --verden-mint: 15 100% 55%;
+    --verden-sky: 45 100% 60%;
+    --ring: 15 100% 55%;
+    --background: 15 30% 8%;
+  }
+
+  .ocean {
+    --primary: 200 100% 50%;
+    --accent: 180 100% 50%;
+    --verden-mint: 200 100% 50%;
+    --verden-sky: 180 100% 60%;
+    --ring: 200 100% 50%;
+    --background: 210 40% 6%;
+  }
+
+  .forest {
+    --primary: 150 100% 40%;
+    --accent: 160 80% 50%;
+    --verden-mint: 150 100% 40%;
+    --verden-sky: 160 80% 60%;
+    --ring: 150 100% 40%;
+    --background: 150 40% 5%;
   }
 }
 

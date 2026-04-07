@@ -4,11 +4,13 @@ import { motion } from 'framer-motion';
 import { Clock, Navigation, Wind } from 'lucide-react';
 import GlassCard from '@/components/verden/GlassCard';
 import Map from '@/components/verden/Map';
+import { useGeoNavigation } from '@/hooks/useGeoNavigation';
 
 const NavigationScreen = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { route } = location.state || {};
+  const { route, destination } = location.state || {};
+  const { location: userLocation, bearing } = useGeoNavigation();
   const [remainingTime, setRemainingTime] = useState(route ? route.duration : 0);
   const [remainingDistance, setRemainingDistance] = useState(route ? route.distance : 0);
 
@@ -30,7 +32,12 @@ const NavigationScreen = () => {
 
   return (
     <div className="mobile-container bg-background">
-      <Map activeRoute={route} />
+      <Map 
+        activeRoute={route} 
+        userLocation={userLocation} 
+        bearing={bearing} 
+        destination={destination}
+      />
       <div className="absolute top-0 left-0 right-0 z-10 p-4">
         <GlassCard>
           <div className="flex justify-between items-center">

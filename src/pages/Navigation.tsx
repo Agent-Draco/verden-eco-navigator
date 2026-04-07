@@ -1,18 +1,23 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Flag, Clock, Navigation2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Flag, Clock, Navigation2, AlertCircle, MapPin, ChevronRight, Share2, Printer } from 'lucide-react';
 import GlassButton from '@/components/verden/GlassButton';
 import GlassCard from '@/components/verden/GlassCard';
 import Map from '@/components/verden/Map';
 import { useGeoNavigation } from '@/hooks/useGeoNavigation';
 import { haversineDistance } from '@/lib/navUtils';
+import { useApp } from '@/contexts/AppContext';
+import { Canvas } from '@react-three/fiber';
+import { Suspense } from 'react';
+import Vehicle3D from '@/components/verden/Vehicle3D';
+import AvatarSelector from '@/components/verden/AvatarSelector';
 
 const FALLBACK_SPEED_MS = 13.89; // 50 km/h fallback for ETA when stationary
 
 /** Converts OSRM step into a human-readable instruction */
 function parseInstruction(step: any): string {
-  if (!step) return '';
+  if (!step) return 'Continue on route';
   const type: string = step.maneuver?.type ?? '';
   const modifier: string = step.maneuver?.modifier ?? '';
   const street = step.name ? `onto ${step.name}` : '';
@@ -34,6 +39,11 @@ function parseInstruction(step: any): string {
   return `${type} ${dir} ${street}`.trim();
 }
 
+/** Utility for class merging */
+function cn(...inputs: any[]) {
+  return inputs.filter(Boolean).join(' ');
+}
+
 const Navigation = () => {
   const navigate = useNavigate();
   const routerLocation = useLocation();
@@ -49,8 +59,11 @@ const Navigation = () => {
   const [showStartPopup, setShowStartPopup] = useState(true);
   const speedMsRef = useRef(0);
 
-  const steps: any[] = route?.legs?.[0]?.steps ?? [];
-  const nextInstruction = parseInstruction(steps[currentStepIndex] ?? null);
+  const steps: any[] = useMemo(() => route?.legs?.[0]?.steps ?? [], [route]);
+  const activeInstruction = useMemo(() => parseInstruction(steps[currentStepIndex] ?? null), [steps, currentStepIndex]);
+
+  const [isAvatarSelectorOpen, setIsAvatarSelectorOpen] = useState(false);
+  const { selectedVehicle, setVehicle } = useApp();
 
   // Guard
   useEffect(() => { if (!route) navigate('/home'); }, [route, navigate]);
@@ -82,7 +95,7 @@ const Navigation = () => {
     const nextStep = steps[currentStepIndex + 1];
     if (nextStep?.maneuver?.location) {
       const [sLon, sLat] = nextStep.maneuver.location;
-      if (haversineDistance(location[0], location[1], sLat, sLon) < 30) {
+      if (haversineDistance(location[0], location[1], sLat, sLon) < 40) {
         setCurrentStepIndex((i) => Math.min(i + 1, steps.length - 1));
       }
     }
@@ -95,141 +108,242 @@ const Navigation = () => {
   });
 
   return (
-    <div className="mobile-container bg-background">
-      {/* ── Map ── */}
-      <Map
-        userLocation={location}
-        userHeading={bearing}
-        bearing={bearing}
-        destination={destination}
-        greenestRoute={route}
-        fastestRoute={null}
-      />
-
-      {/* ── "Acquiring GPS…" overlay before first fix ── */}
-      <AnimatePresence>
-        {!ready && !gpsError && (
-          <motion.div
-            className="absolute inset-0 z-30 flex items-center justify-center bg-background/70 backdrop-blur-sm"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <GlassCard className="p-6 text-center max-w-xs mx-4">
-              <div className="flex items-center justify-center mb-3">
-                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-              </div>
-              <p className="text-sm font-semibold text-foreground">Acquiring GPS signal…</p>
-              <p className="text-xs text-muted-foreground mt-1">Keep the app open and move to an open area for best results.</p>
-            </GlassCard>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ── Startup popup ── */}
-      <AnimatePresence>
-        {showStartPopup && ready && (
-          <motion.div
-            className="absolute inset-0 z-30 flex items-center justify-center bg-background/60 backdrop-blur-sm"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <GlassCard className="p-6 text-center max-w-xs mx-4">
-              <Navigation2 size={40} className="text-primary mx-auto mb-3" />
-              <h2 className="text-xl font-display font-black text-foreground mb-1">Navigation Started</h2>
-              <p className="text-sm text-muted-foreground">
-                Heading to{' '}
-                <span className="text-foreground font-semibold">
-                  {destination?.properties?.name ?? 'your destination'}
-                </span>
-              </p>
-              {nextInstruction && (
-                <p className="text-xs text-primary mt-2 font-medium">{nextInstruction}</p>
-              )}
-            </GlassCard>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ── Top bar: destination + turn instruction ── */}
-      <div className="absolute top-0 left-0 right-0 z-20 p-4 space-y-2">
-        <motion.div initial={{ y: -100 }} animate={{ y: 0 }} transition={{ type: 'spring', stiffness: 100 }}>
-          <div className="glass-strong rounded-2xl p-3 flex items-center justify-between shadow-lg">
-            <button onClick={() => navigate('/home')} className="p-2 glass rounded-xl text-foreground">
-              <ArrowLeft size={20} />
-            </button>
-            <div className="flex-1 text-center">
-              <p className="text-xl font-display font-black text-foreground drop-shadow-md">
-                {destination?.properties?.name || 'Destination'}
-              </p>
-              <p className="text-xs font-semibold text-muted-foreground">
-                {remainingDist.toFixed(1)} km left
-              </p>
-            </div>
-            <div className="w-10" />
+    <div className="flex w-full h-full relative overflow-hidden bg-[#f0f0f0] dark:bg-[#1a1a1a]">
+      {/* ── Desktop Directions Panel ── */}
+      <div className="hidden md:flex flex-col w-[380px] bg-background border-r border-border h-full z-20 overflow-hidden shadow-2xl relative">
+        {/* Header */}
+        <div className="p-4 border-b border-border shadow-sm">
+          <div className="flex items-center gap-3 mb-4">
+             <button 
+              onClick={() => navigate('/home')}
+              className="p-2 hover:bg-muted rounded-full transition-colors"
+             >
+                <ArrowLeft size={20} className="text-foreground" />
+             </button>
+             <div className="flex-1">
+                <p className="text-xs text-muted-foreground font-medium">From Your location</p>
+                <p className="text-sm font-bold text-foreground truncate">{destination?.properties?.name || 'Destination'}</p>
+             </div>
           </div>
-        </motion.div>
 
-        {/* Turn instruction banner */}
-        <AnimatePresence mode="wait">
-          {nextInstruction && !showStartPopup && (
-            <motion.div
-              key={currentStepIndex}
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.25 }}
-            >
-              <div className="glass-strong rounded-2xl px-4 py-3 flex items-center gap-3 shadow-md border border-primary/30">
-                <AlertCircle size={18} className="text-primary shrink-0" />
-                <p className="text-sm font-semibold text-foreground leading-snug">{nextInstruction}</p>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+          <div className="flex items-end gap-2 mb-2">
+            <span className="text-3xl font-display font-black text-foreground">{eta} min</span>
+            <span className="text-muted-foreground mb-1">({remainingDist.toFixed(1)} km)</span>
+          </div>
+          <p className="text-sm text-muted-foreground mb-4">via Best route now due to traffic conditions</p>
 
-        {/* GPS error banner */}
-        <AnimatePresence>
-          {gpsError && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <div className="glass-strong rounded-2xl px-4 py-3 flex items-center gap-3 border border-yellow-500/40 bg-yellow-500/10">
-                <AlertCircle size={16} className="text-yellow-400 shrink-0" />
-                <p className="text-xs font-medium text-foreground">{gpsError}</p>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+          <div className="flex items-center gap-2">
+            <button className="flex-1 py-1.5 px-3 rounded-full border border-border text-xs font-bold hover:bg-muted transition-colors flex items-center justify-center gap-2">
+              <Share2 size={14} /> Send to phone
+            </button>
+            <button className="p-2 rounded-full border border-border hover:bg-muted font-bold">
+               <Printer size={14} />
+            </button>
+          </div>
+        </div>
 
-      {/* ── Bottom: ETA + live speed + end drive ── */}
-      <div className="absolute bottom-6 left-0 right-0 z-20 px-4">
-        <motion.div initial={{ y: 100 }} animate={{ y: 0 }} transition={{ type: 'spring', stiffness: 100 }}>
-          <GlassCard className="p-4 border-primary/40 rounded-3xl glow-green-sm mb-3">
-            <div className="flex justify-between items-center px-2">
-              <div className="flex flex-col">
-                <span className="text-4xl font-black font-display text-primary">
-                  {eta}<span className="text-lg text-foreground"> min</span>
-                </span>
-                <span className="text-sm font-medium text-muted-foreground flex items-center gap-1 mt-1">
-                  <Clock size={14} />Arrival {arrivalTime}
-                </span>
-              </div>
-              <div className="w-16 h-16 rounded-full border-4 border-primary/20 flex flex-col items-center justify-center">
-                <span className="text-lg font-black font-display text-foreground leading-none">{speedKmh}</span>
-                <span className="text-[10px] text-muted-foreground font-bold leading-none">km/h</span>
-              </div>
+        {/* Instructions List */}
+        <div className="flex-1 overflow-y-auto py-2 custom-scrollbar">
+          <div className="px-4 py-4 flex items-start gap-4 border-b border-border/50">
+            <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center shrink-0 mt-1">
+              <MapPin size={14} className="text-primary" />
             </div>
-          </GlassCard>
-          <GlassButton
-            size="lg"
-            className="w-full bg-destructive/10 text-destructive hover:bg-destructive shadow-lg rounded-2xl"
+            <div>
+              <p className="text-sm font-bold text-foreground">Your location</p>
+            </div>
+          </div>
+
+          {steps.map((step, idx) => {
+            const isActive = idx === currentStepIndex;
+            const instruction = parseInstruction(step);
+            return (
+              <div 
+                key={`step-${idx}`} 
+                className={cn(
+                  "px-4 py-5 flex items-start gap-4 border-b border-border/40 transition-colors",
+                  isActive ? "bg-primary/5 border-l-4 border-l-primary" : "hover:bg-muted/30"
+                )}
+              >
+                <div className="shrink-0 mt-1">
+                   <ChevronRight size={18} className={cn(isActive ? "text-primary rotate-90" : "text-muted-foreground/60")} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className={cn("text-sm leading-relaxed", isActive ? "font-bold text-foreground" : "text-muted-foreground")}>
+                    {instruction}
+                  </p>
+                  <p className="text-xs text-muted-foreground/80 mt-1 font-medium">
+                    {step.duration < 60 ? `${Math.round(step.duration)} sec` : `${Math.round(step.duration / 60)} min`} ({Math.round(step.distance)} m)
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+
+          <div className="px-4 py-8 flex items-start gap-4">
+            <div className="w-6 h-6 rounded-full bg-destructive/20 flex items-center justify-center shrink-0 mt-1">
+              <Flag size={14} className="text-destructive" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-foreground">{destination?.properties?.name || 'Destination'}</p>
+              <p className="text-xs text-muted-foreground mt-1">{destination?.properties?.display_name}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer controls */}
+        <div className="p-4 bg-muted/20 border-t border-border mt-auto">
+          <GlassButton 
+            className="w-full bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground rounded-xl"
             onClick={() => navigate('/trip-summary')}
           >
-            <Flag size={20} className="mr-2" />End Drive
+            End Navigation
           </GlassButton>
-        </motion.div>
+        </div>
       </div>
+
+      {/* ── Map (Main Area) ── */}
+      <div className="flex-1 relative bg-[#e0e0e0] dark:bg-[#202020]">
+        <Map
+          userLocation={location}
+          userHeading={bearing}
+          bearing={bearing}
+          destination={destination}
+          greenestRoute={route}
+          fastestRoute={null}
+        />
+
+        {/* ── Mobile-only overlays ── */}
+        
+        {/* Google Maps Style Top Bar (Maneuver Indicator) */}
+        <div className="md:hidden absolute top-0 left-0 right-0 z-40 p-4 pt-10 bg-gradient-to-b from-black/20 to-transparent pointer-events-none">
+          <motion.div 
+            initial={{ y: -100 }} 
+            animate={{ y: 0 }} 
+            className="pointer-events-auto"
+          >
+            <div className="bg-[#0f6b40] rounded-2xl p-4 flex items-center gap-4 shadow-xl border border-white/10">
+              <div className="w-16 h-16 flex items-center justify-center">
+                 <Navigation2 size={42} className="text-white -rotate-45 drop-shadow-lg" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-2xl font-black text-white leading-none tracking-tight mb-1">
+                   {steps[currentStepIndex + 1]?.distance < 500 
+                     ? `${Math.round(steps[currentStepIndex + 1]?.distance)} m` 
+                     : `${(steps[currentStepIndex + 1]?.distance / 1000).toFixed(1)} km`}
+                </p>
+                <p className="text-lg font-bold text-white/90 leading-tight truncate">
+                  {activeInstruction}
+                </p>
+                {steps[currentStepIndex + 2] && (
+                  <p className="text-xs font-bold text-white/60 mt-1 uppercase tracking-widest">
+                    Then: {parseInstruction(steps[currentStepIndex + 2])}
+                  </p>
+                )}
+              </div>
+              <div className="p-2 bg-white/10 rounded-full">
+                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Floating Actions (Right Side) */}
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-3">
+          <GlassButton className="w-12 h-12 p-0 rounded-full shadow-lg bg-white/90 dark:bg-black/80 text-foreground border-none">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </GlassButton>
+          <GlassButton className="w-12 h-12 p-0 rounded-full shadow-lg bg-white/90 dark:bg-black/80 text-foreground border-none">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+          </GlassButton>
+          <GlassButton className="w-12 h-12 p-0 rounded-full shadow-lg bg-[#fdbd2d] text-black border-none font-black text-xl">
+             !
+          </GlassButton>
+        </div>
+
+        {/* Google Maps Style Bottom Card */}
+        <div className="md:hidden absolute bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-md rounded-t-[32px] p-6 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] border-t border-border">
+          <div className="flex items-center justify-between gap-6 mb-4">
+             <div className="flex-1">
+                <p className="text-3xl font-black text-[#0f6b40] dark:text-[#22c55e] leading-none mb-1">
+                  {eta}<span className="text-lg font-bold"> min</span>
+                </p>
+                <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground">
+                   <span>{remainingDist.toFixed(1)} km</span>
+                   <span className="opacity-30">•</span>
+                   <span>Arrival: {arrivalTime}</span>
+                </div>
+             </div>
+             
+             <div 
+               className="w-16 h-16 rounded-2xl bg-muted/30 flex flex-col items-center justify-center p-2 cursor-pointer active:scale-95 transition-transform"
+               onClick={() => setIsAvatarSelectorOpen(true)}
+             >
+                <div className="w-full h-full relative">
+                   <Canvas camera={{ position: [2, 2, 2], fov: 40 }}>
+                      <ambientLight intensity={1.5} />
+                      <Suspense fallback={null}>
+                        <Vehicle3D 
+                          model={selectedVehicle.model} 
+                          color={selectedVehicle.color} 
+                          rotation={0} 
+                          scale={1.2} 
+                        />
+                      </Suspense>
+                   </Canvas>
+                </div>
+             </div>
+
+             <GlassButton 
+              className="bg-destructive/10 text-destructive hover:bg-destructive shadow-none rounded-2xl px-6 h-14 font-black uppercase tracking-widest text-sm border-2 border-destructive/20"
+              onClick={() => navigate('/trip-summary')}
+             >
+               Exit
+             </GlassButton>
+          </div>
+        </div>
+
+        {/* Avatar Selector Modal */}
+        <AvatarSelector 
+          isOpen={isAvatarSelectorOpen}
+          onClose={() => setIsAvatarSelectorOpen(false)}
+          onSelect={(m, c) => setVehicle(m, c)}
+          currentModel={selectedVehicle.model}
+          currentColor={selectedVehicle.color}
+        />
+
+        {/* Global Nav/GPS Overlays */}
+        <AnimatePresence>
+          {!ready && !gpsError && (
+            <div className="absolute inset-0 z-30 flex items-center justify-center bg-background/70 backdrop-blur-sm">
+                <GlassCard className="p-6 text-center max-w-xs mx-4 shadow-2xl">
+                    <div className="flex items-center justify-center mb-3">
+                    <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                    </div>
+                    <p className="text-sm font-semibold text-foreground">Acquiring GPS signal…</p>
+                </GlassCard>
+            </div>
+          )}
+        </AnimatePresence>
+        
+        <AnimatePresence>
+          {showStartPopup && ready && (
+            <motion.div className="absolute inset-0 z-30 flex items-center justify-center bg-background/60 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <GlassCard className="p-6 text-center max-w-xs mx-4 shadow-2xl border-primary/20">
+                <Navigation2 size={40} className="text-primary mx-auto mb-3" />
+                <h2 className="text-xl font-display font-black text-foreground mb-1">Navigation Started</h2>
+                <p className="text-xs text-primary mt-2 font-medium bg-primary/10 py-1.5 px-3 rounded-full inline-block">{activeInstruction}</p>
+              </GlassCard>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(var(--primary), 0.1); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(var(--primary), 0.2); }
+      `}</style>
     </div>
   );
 };

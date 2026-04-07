@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-export type Theme = "dark" | "light" | "system";
+export type Theme = "dark" | "light" | "system" | string;
 
 type ThemeProviderProps = {
   children: React.ReactNode;
@@ -37,9 +37,14 @@ export function ThemeProvider({
   useEffect(() => {
     const root = window.document.documentElement;
 
+    root.classList.forEach((className) => {
+      if (className !== 'dark' && className !== 'light' && className !== 'system') {
+        root.classList.remove(className);
+      }
+    });
     root.classList.remove("light", "dark");
     
-    let resolvedTheme: "light" | "dark" = "light";
+    let resolvedTheme: string = "light";
 
     if (theme === "system") {
       resolvedTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
@@ -48,6 +53,12 @@ export function ThemeProvider({
     }
 
     root.classList.add(resolvedTheme);
+    
+    // If it's a custom theme like phoenix, also add 'dark' for general dark-mode support if intended
+    if (theme !== 'light' && theme !== 'system' && theme !== 'dark') {
+        root.classList.add('dark'); // Most custom themes are dark-based
+    }
+
     setSystemTheme(window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
     
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");

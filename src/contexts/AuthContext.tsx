@@ -38,46 +38,50 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(true);
+    let mounted = true;
+    let initialized = false;
+    console.log("[Auth] Initializing AuthContext (Unified Path)...");
 
-    // Safety timeout: Ensure loading is set to false even if Supabase hangs
-    const timeoutId = setTimeout(() => {
-        setLoading(false);
-        console.warn("Auth check timed out. Proceeding with fallback.");
-    }, 5000);
+    const handleAuthStateChange = async (event: string, newSession: Session | null) => {
+      if (!mounted) return;
+      
+      console.log(`[Auth] Event: ${event} | Session: ${!!newSession}`);
+      
+      if (newSession?.user) {
+          // Stay in loading until profile is ready
+          const profile = await fetchUserProfile(newSession.user);
+          if (mounted) {
+            // Batch updates: set session and user together then stop loading
+            setSession(newSession);
+            setUser(profile);
+            setLoading(false);
+            initialized = true;
+            console.log("[Auth] Session & Profile ready.");
+          }
+      } else {
+          setSession(null);
+          setUser(null);
+          setLoading(false);
+          initialized = true;
+          console.log("[Auth] No active session.");
+      }
+    };
 
-    const getActiveSession = async () => {
-        try {
-            const { data: { session: activeSession } } = await supabase.auth.getSession();
-            setSession(activeSession);
-            if (activeSession?.user) {
-                const profile = await fetchUserProfile(activeSession.user);
-                setUser(profile);
-            }
-        } catch (error) {
-            console.warn("Supabase auth check failed. Check your credentials.", error);
-        } finally {
-            clearTimeout(timeoutId);
+    // Emergency rescue: If auth never resolves in 8s, force-quit loading
+    const rescueTimeout = setTimeout(() => {
+        if (mounted && !initialized) {
+            console.warn("[Auth] Initialization rescue triggered.");
             setLoading(false);
         }
-    };
-    
-    getActiveSession();
+    }, 8000);
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
-      setSession(newSession);
-      if (newSession?.user) {
-          const profile = await fetchUserProfile(newSession.user);
-          setUser(profile);
-      } else {
-          setUser(null);
-      }
-      clearTimeout(timeoutId);
-      setLoading(false);
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, newSession) => {
+      handleAuthStateChange(event, newSession);
     });
 
     return () => {
-      clearTimeout(timeoutId);
+      mounted = false;
+      clearTimeout(rescueTimeout);
       authListener?.subscription.unsubscribe();
     };
   }, []);
@@ -112,9 +116,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 .upsert([{
                      id: supabaseUser.id,
                      email: supabaseUser.email || '',
-                     name: supabaseUser.user_metadata?.name || 'Eco User',
-                     credits: 100,
-                     eco_score: 50,
+                     name: supabaseUser.user_metadata?.name || 'Eco Warrior',
+                     credits: 0,
+                     eco_score: 0,
                      avatar: 'default',
                      theme: 'default'
                 }])
@@ -138,15 +142,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     } catch (error) {
         console.error('Error fetching user profile:', error);
-        // Fallback for verification
+        // Immediate fallback to prevent hanging the UI
         return {
           id: supabaseUser.id,
-          name: 'Eco User (Test)',
+          name: supabaseUser.user_metadata?.name || 'Eco Warrior',
           email: supabaseUser.email || '',
           avatar: 'default',
           memberSince: new Date().toLocaleDateString(),
-          credits: 100,
-          eco_score: 50,
+          credits: 0,
+          eco_score: 0,
           theme: 'default',
         };
     }
@@ -182,12 +186,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     
     if (error) throw error;
     
-    if (data.user) {
-        const profile = await fetchUserProfile(data.user);
-        setUser(profile);
-    }
-    setSession(data.session);
-
+    // onAuthStateChange will handle setting the user and session
     return { user: data.user, session: data.session };
   };
 
