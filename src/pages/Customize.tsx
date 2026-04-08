@@ -89,7 +89,7 @@ const Customize = () => {
   }, [appTheme, setSystemTheme]);
 
   return (
-    <div className="relative w-full h-full p-4 pb-32 overflow-y-auto flex flex-col items-center">
+    <div className="relative w-full h-full p-4 pb-32 overflow-y-auto flex flex-col items-center bg-topographic">
       <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-verden-lavender/5 blur-[120px] pointer-events-none" />
 
       <div className="w-full max-w-[1400px] flex flex-col min-h-full">

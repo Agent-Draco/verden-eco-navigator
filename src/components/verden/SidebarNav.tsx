@@ -20,7 +20,10 @@ const SidebarNav = () => {
     <div className="hidden md:flex flex-col items-center py-6 w-20 border-r border-border bg-background/80 backdrop-blur-xl h-screen z-[50] shrink-0">
       {/* Top Logo/Menu Area */}
       <div className="mb-8">
-        <button className="p-3 rounded-2xl hover:bg-muted text-muted-foreground transition-colors">
+        <button 
+          className="p-3 rounded-2xl hover:bg-muted text-muted-foreground transition-colors"
+          aria-label="Toggle menu"
+        >
           <Menu size={24} />
         </button>
       </div>
@@ -65,6 +68,7 @@ const SidebarNav = () => {
         <button 
           onClick={() => navigate('/customize')}
           className="p-3 rounded-2xl text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          aria-label="Open settings"
         >
           <Settings size={22} />
         </button>

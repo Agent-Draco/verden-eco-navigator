@@ -87,16 +87,8 @@ const Map = ({
 
       // Add branding watermark
       const logoDiv = document.createElement('div');
-      logoDiv.className = 'verden-watermark';
-      logoDiv.innerHTML = '<span style="font-weight:bold; color:#22c55e;">Verden</span> Maps';
-      logoDiv.style.position = 'absolute';
-      logoDiv.style.bottom = '10px';
-      logoDiv.style.right = '10px';
-      logoDiv.style.backgroundColor = 'rgba(255,255,255,0.7)';
-      logoDiv.style.padding = '2px 8px';
-      logoDiv.style.borderRadius = '4px';
-      logoDiv.style.fontSize = '12px';
-      logoDiv.style.pointerEvents = 'none';
+      logoDiv.className = 'verden-watermark-enhanced';
+      logoDiv.innerHTML = '<span class="verden-watermark-brand">Verden</span> Maps';
       mapRef.current.appendChild(logoDiv);
     }
 
@@ -270,7 +262,7 @@ const Map = ({
 
       {/* Render the 3D Vehicle via Portal into the DOM marker element */}
       {vehiclePortal && createPortal(
-        <div style={{ width: '80px', height: '80px' }}>
+        <div className="w-20 h-20">
           <Canvas camera={{ position: [0, 5, 0], fov: 30 }}>
             <ambientLight intensity={2.0} />
             <pointLight position={[0, 5, 0]} intensity={0.5} />
@@ -300,7 +292,22 @@ const Map = ({
                    currentTheme === 'forest' ? 'hue-rotate(-40deg) saturate(1.5)' : 
                    'saturate(1.2) contrast(1.05) brightness(0.95)'};
         }
-        .verden-watermark { z-index: 1; opacity: 0.8; }
+        .verden-watermark-enhanced { 
+          position: absolute;
+          bottom: 10px;
+          right: 10px;
+          background-color: rgba(255, 255, 255, 0.7);
+          padding: 2px 8px;
+          border-radius: 4px;
+          font-size: 12px;
+          pointer-events: none;
+          z-index: 1; 
+          opacity: 0.8; 
+        }
+        .verden-watermark-brand {
+          font-weight: bold;
+          color: #22c55e;
+        }
         .user-marker-3d { 
           transform-style: preserve-3d;
           perspective: 1000px;

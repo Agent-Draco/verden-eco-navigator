@@ -110,13 +110,14 @@ const Navigation = () => {
   return (
     <div className="flex w-full h-full relative overflow-hidden bg-[#f0f0f0] dark:bg-[#1a1a1a]">
       {/* ── Desktop Directions Panel ── */}
-      <div className="hidden md:flex flex-col w-[380px] bg-background border-r border-border h-full z-20 overflow-hidden shadow-2xl relative">
+      <div className="hidden md:flex flex-col w-[380px] glass-strong border-r border-white/10 h-full z-20 overflow-hidden shadow-2xl relative">
         {/* Header */}
         <div className="p-4 border-b border-border shadow-sm">
           <div className="flex items-center gap-3 mb-4">
              <button 
               onClick={() => navigate('/home')}
               className="p-2 hover:bg-muted rounded-full transition-colors"
+              aria-label="Back to home"
              >
                 <ArrowLeft size={20} className="text-foreground" />
              </button>
@@ -136,7 +137,10 @@ const Navigation = () => {
             <button className="flex-1 py-1.5 px-3 rounded-full border border-border text-xs font-bold hover:bg-muted transition-colors flex items-center justify-center gap-2">
               <Share2 size={14} /> Send to phone
             </button>
-            <button className="p-2 rounded-full border border-border hover:bg-muted font-bold">
+            <button 
+              className="p-2 rounded-full border border-border hover:bg-muted font-bold"
+              aria-label="Print directions"
+            >
                <Printer size={14} />
             </button>
           </div>
@@ -190,11 +194,11 @@ const Navigation = () => {
           </div>
         </div>
 
-        {/* Footer controls */}
-        <div className="p-4 bg-muted/20 border-t border-border mt-auto">
+        <div className="p-6 glass-strong border-t border-white/10 mt-auto">
           <GlassButton 
-            className="w-full bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground rounded-xl"
+            className="w-full bg-destructive text-white rounded-2xl shadow-liquid"
             onClick={() => navigate('/trip-summary')}
+            variant="primary"
           >
             End Navigation
           </GlassButton>
@@ -221,41 +225,34 @@ const Navigation = () => {
             animate={{ y: 0 }} 
             className="pointer-events-auto"
           >
-            <div className="bg-[#0f6b40] rounded-2xl p-4 flex items-center gap-4 shadow-xl border border-white/10">
-              <div className="w-16 h-16 flex items-center justify-center">
+            <div className="bg-[#0f6b40] rounded-[32px] p-6 flex items-center gap-5 shadow-2xl border border-white/20 relative overflow-hidden">
+              <div className="absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+              <div className="w-16 h-16 flex items-center justify-center bg-white/10 rounded-2xl">
                  <Navigation2 size={42} className="text-white -rotate-45 drop-shadow-lg" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-2xl font-black text-white leading-none tracking-tight mb-1">
+                <p className="text-3xl font-black text-white leading-none tracking-tight mb-1">
                    {steps[currentStepIndex + 1]?.distance < 500 
                      ? `${Math.round(steps[currentStepIndex + 1]?.distance)} m` 
                      : `${(steps[currentStepIndex + 1]?.distance / 1000).toFixed(1)} km`}
                 </p>
-                <p className="text-lg font-bold text-white/90 leading-tight truncate">
+                <p className="text-xl font-bold text-white leading-tight truncate">
                   {activeInstruction}
                 </p>
-                {steps[currentStepIndex + 2] && (
-                  <p className="text-xs font-bold text-white/60 mt-1 uppercase tracking-widest">
-                    Then: {parseInstruction(steps[currentStepIndex + 2])}
-                  </p>
-                )}
-              </div>
-              <div className="p-2 bg-white/10 rounded-full">
-                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
               </div>
             </div>
           </motion.div>
         </div>
 
         {/* Floating Actions (Right Side) */}
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-3">
-          <GlassButton className="w-12 h-12 p-0 rounded-full shadow-lg bg-white/90 dark:bg-black/80 text-foreground border-none">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-4">
+          <GlassButton className="w-14 h-14 p-0 rounded-full shadow-liquid glass border-white/20">
+            <Search size={24} strokeWidth={2.5} />
           </GlassButton>
-          <GlassButton className="w-12 h-12 p-0 rounded-full shadow-lg bg-white/90 dark:bg-black/80 text-foreground border-none">
+          <GlassButton className="w-14 h-14 p-0 rounded-full shadow-liquid glass border-white/20">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
           </GlassButton>
-          <GlassButton className="w-12 h-12 p-0 rounded-full shadow-lg bg-[#fdbd2d] text-black border-none font-black text-xl">
+          <GlassButton className="w-14 h-14 p-0 rounded-full shadow-liquid bg-[#fdbd2d] text-black border-none font-black text-2xl">
              !
           </GlassButton>
         </div>

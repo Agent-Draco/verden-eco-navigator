@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, Map, Calendar, MessageSquare, ArrowLeft, Sun, Moon, Send, Sparkles, Car, Share2, Loader2 } from "lucide-react";
+import { Users, Map, Calendar, MessageSquare, ArrowLeft, Sun, Moon, Send, Sparkles, Car, Share2, Loader2, Plus } from "lucide-react";
 import GlassCard from "@/components/verden/GlassCard";
 import GlassButton from "@/components/verden/GlassButton";
 import GroupDecision from "@/components/verden/GroupDecision";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/services/supabase";
+import { cn } from "@/lib/utils";
 
 const EcoMoovGroup = () => {
   const navigate = useNavigate();

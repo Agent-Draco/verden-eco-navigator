@@ -32,9 +32,8 @@ const Login = () => {
   };
 
   return (
-    <div className="mobile-container bg-background">
-      <div className="absolute inset-0 bg-gradient-to-br from-verden-mint/10 via-transparent to-verden-sky/10" />
-      <div className="relative z-10 flex flex-col min-h-screen px-6 pt-16 pb-8">
+    <div className="mobile-container bg-abstract">
+      <div className="relative z-10 flex flex-col min-h-screen px-8 pt-20 pb-12">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}

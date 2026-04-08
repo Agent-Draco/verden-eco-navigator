@@ -121,7 +121,7 @@ const Home = () => {
   const co2Difference = fastestRoute && greenestRoute ? parseFloat((fastestRoute.co2 - greenestRoute.co2).toFixed(1)) : 0;
 
   return (
-    <div className="w-full h-full relative overflow-hidden">
+    <div className="w-full h-full relative overflow-hidden bg-topographic">
       {/* Background Map */}
       <Map 
         userLocation={userLocation}
@@ -139,18 +139,26 @@ const Home = () => {
         <div className="w-full md:w-[380px] pointer-events-auto flex flex-col gap-4 max-h-full">
           
           {/* Top Bar (Logo & Credits) */}
-          <div className="flex items-center justify-between mb-0">
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-between mb-0"
+          >
             <img src={verdenLogo} alt="Verden" className="w-8 h-8 drop-shadow-lg" />
-            <div className="glass rounded-full px-3 py-1 flex items-center gap-2 shadow-sm">
+            <div className="glass rounded-full px-4 py-1.5 flex items-center gap-2 shadow-liquid transition-liquid hover:scale-105">
               <Leaf size={14} className="text-primary" />
-              <span className="text-xs font-display font-semibold text-foreground">{credits} credits</span>
+              <span className="text-xs font-display font-bold text-foreground">{credits} credits</span>
             </div>
-          </div>
+          </motion.div>
 
           {/* Search Input Pane */}
-          <div className="space-y-3">
-            <GlassCard variant="strong" className="flex items-center gap-3 px-4 py-3 shadow-xl">
-              <Search size={20} className="text-muted-foreground" />
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="space-y-3"
+          >
+            <GlassCard variant="strong" className="flex items-center gap-4 px-6 py-4 shadow-liquid border-white/20 transition-liquid group focus-within:ring-2 focus-within:ring-primary/40">
+              <Search size={22} className="text-muted-foreground group-focus-within:text-primary transition-colors" />
               <input
                 ref={inputRef}
                 type="text"
@@ -162,20 +170,20 @@ const Home = () => {
                   setShowRoutes(false);
                 }}
                 onFocus={() => setShowSuggestions(true)}
-                className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground font-body"
+                className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground font-display font-medium text-lg leading-none"
               />
               {isSearching && (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
               )}
             </GlassCard>
 
             {/* Transport & Mode Controls */}
             <div className="flex flex-col gap-3">
-                <div className="flex justify-around bg-verden-glass/40 backdrop-blur-md rounded-2xl p-1 gap-1">
-                    <GlassButton onClick={() => setTransportMode('car')} variant={transportMode === 'car' ? 'default' : 'glass'} size="icon" className="flex-1 h-12 text-foreground"><Car size={20}/></GlassButton>
-                    <GlassButton onClick={() => setTransportMode('bike')} variant={transportMode === 'bike' ? 'default' : 'glass'} size="icon" className="flex-1 h-12 text-xl">🏍️</GlassButton>
-                    <GlassButton onClick={() => setTransportMode('cycle')} variant={transportMode === 'cycle' ? 'default' : 'glass'} size="icon" className="flex-1 h-12 text-foreground"><Bike size={20}/></GlassButton>
-                    <GlassButton onClick={() => setTransportMode('public')} variant={transportMode === 'public' ? 'default' : 'glass'} size="icon" className="flex-1 h-12 text-foreground"><Bus size={20}/></GlassButton>
+                <div className="flex justify-around bg-white/5 backdrop-blur-xl rounded-[24px] p-1 gap-1 border border-white/10 shadow-liquid">
+                    <GlassButton onClick={() => setTransportMode('car')} variant={transportMode === 'car' ? 'default' : 'glass'} size="icon" className="flex-1 h-12 text-foreground rounded-[20px]"><Car size={20}/></GlassButton>
+                    <GlassButton onClick={() => setTransportMode('bike')} variant={transportMode === 'bike' ? 'default' : 'glass'} size="icon" className="flex-1 h-12 text-xl rounded-[20px]">🏍️</GlassButton>
+                    <GlassButton onClick={() => setTransportMode('cycle')} variant={transportMode === 'cycle' ? 'default' : 'glass'} size="icon" className="flex-1 h-12 text-foreground rounded-[20px]"><Bike size={20}/></GlassButton>
+                    <GlassButton onClick={() => setTransportMode('public')} variant={transportMode === 'public' ? 'default' : 'glass'} size="icon" className="flex-1 h-12 text-foreground rounded-[20px]"><Bus size={20}/></GlassButton>
                 </div>
                 
                 <div className="flex gap-2">
@@ -200,20 +208,33 @@ const Home = () => {
                 exit={{ opacity: 0, height: 0 }}
                 className="overflow-hidden"
               >
-                <GlassCard variant="strong" className="p-0 overflow-hidden max-h-[50vh] overflow-y-auto shadow-2xl border-primary/10">
+                <GlassCard variant="strong" className="p-0 overflow-hidden max-h-[50vh] overflow-y-auto shadow-2xl border-white/20 rounded-[32px] mt-2">
+                  <motion.div
+                    initial="hidden"
+                    animate="visible"
+                    variants={{
+                      visible: { transition: { staggerChildren: 0.05 } }
+                    }}
+                  >
                   {/* Active Search Results */}
                   {!isSearching && suggestions.length > 0 && suggestions.map((place, i) => (
-                    <button
+                    <motion.button
                       key={`res-${i}`}
+                      variants={{
+                        hidden: { opacity: 0, x: -10 },
+                        visible: { opacity: 1, x: 0 }
+                      }}
                       onClick={() => handleSelect(place)}
-                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors border-b border-border/50 last:border-0"
+                      className="w-full flex items-center gap-4 px-6 py-4 hover:bg-white/10 transition-colors border-b border-white/5 last:border-0"
                     >
-                      <MapPin size={16} className="text-primary shrink-0" />
-                      <div className="text-left">
-                        <p className="text-sm font-medium text-foreground">{place.properties.name}</p>
-                        <p className="text-[11px] text-muted-foreground line-clamp-1">{place.properties.city}{place.properties.state ? `, ${place.properties.state}` : ''}</p>
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <MapPin size={18} className="text-primary" />
                       </div>
-                    </button>
+                      <div className="text-left">
+                        <p className="text-base font-bold text-foreground">{place.properties.name}</p>
+                        <p className="text-xs text-muted-foreground line-clamp-1">{place.properties.city}{place.properties.state ? `, ${place.properties.state}` : ''}</p>
+                      </div>
+                    </motion.button>
                   ))}
 
                   {/* No Results Fallback */}
@@ -264,7 +285,7 @@ const Home = () => {
                         </button>
                       ))}
                     </div>
-                  )}
+                  </motion.div>
                 </GlassCard>
               </motion.div>
             )}
