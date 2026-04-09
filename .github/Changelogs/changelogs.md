@@ -19,3 +19,8 @@
 - [NAV-003] (2026-04-09): Advanced Cesium Navigation Stabilization - Major architectural refactor of the follow-camera and vehicle transform pipeline. Implemented hybrid velocity-smoothing logic (LERP @ 0.15), predictive camera foresight, and Unity-to-Cesium frame alignment via nodeTransformations. Added high-fidelity 3D route rendering with manual terrain sampling, PolylineGlowMaterial, and depthFaceMaterial for "x-ray" visibility through terrain. Implemented robust listener cleanup for React lifecycle safety.
 - [NAV-004] (2026-04-09): UI Polishing & Polyline Fixes - Restored navbar visibility on the home map by syncing state with the search overlay. Refactored Cesium route polyline rendering with increased vertical offset (0.5m) and simplified depthFailMaterial to ensure hardware compatibility and prevent z-fighting. Aligned /navigation-dev route with production navbar exclusion rules.
 - [CSS-002] (2026-04-09): Global Scroll Restoration - Resolved "unable to scroll" issue by refactoring `Shell.tsx` and `index.css` to remove restrictive `overflow-hidden` rules on main layout containers. Cleaned up redundant `overflow-y-auto` and `h-full` constraints across `Customize`, `Credits`, `Membership`, `Profile`, `Settings`, and `EcoMoov` pages to provide a unified, smooth scrolling experience.
+
+## 2.0.1 (Stable Release 2)
+- [FIX-001] (2026-04-09): Fixed ReferenceError: `cn` is not defined in `EcoMoov.tsx` - Added the missing utility import.
+- [FIX-002] (2026-04-09): Fixed `Settings.tsx` errors - Corrected sign-out function name to `logout` and implemented literal ARIA `aria-checked` values via conditional rendering for strict compliance.
+

@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 const Settings = () => {
   const { theme, setTheme, unlockedThemes } = useApp();
-  const { user, signOut } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   const [notifications, setNotifications] = useState({
@@ -20,7 +20,7 @@ const Settings = () => {
   });
 
   const handleLogout = async () => {
-    await signOut();
+    await logout();
     navigate('/login');
   };
 
@@ -81,18 +81,37 @@ const Settings = () => {
                   <Bell size={18} className="text-muted-foreground" />
                   <p className="text-sm font-medium text-foreground capitalize">{key} Notifications</p>
                 </div>
-                <button 
-                  onClick={() => setNotifications(prev => ({ ...prev, [key]: !val }))}
-                  className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-1 ${val ? 'bg-primary' : 'bg-muted'}`}
-                  aria-label={`Toggle ${key} notifications`}
-                  role="switch"
-                  aria-checked={val}
-                >
-                  <motion.div 
-                    animate={{ x: val ? 24 : 0 }}
-                    className="w-4 h-4 rounded-full bg-white shadow-sm"
-                  />
-                </button>
+                {val ? (
+                  <button 
+                    type="button"
+                    role="switch"
+                    aria-checked="true"
+                    onClick={() => setNotifications(prev => ({ ...prev, [key]: !val }))}
+                    className="w-12 h-6 rounded-full transition-colors relative flex items-center px-1 bg-primary"
+                    aria-label={`Toggle ${key} notifications`}
+                  >
+                    <motion.div 
+                      layout
+                      animate={{ x: 24 }}
+                      className="w-4 h-4 rounded-full bg-white shadow-sm"
+                    />
+                  </button>
+                ) : (
+                  <button 
+                    type="button"
+                    role="switch"
+                    aria-checked="false"
+                    onClick={() => setNotifications(prev => ({ ...prev, [key]: !val }))}
+                    className="w-12 h-6 rounded-full transition-colors relative flex items-center px-1 bg-muted"
+                    aria-label={`Toggle ${key} notifications`}
+                  >
+                    <motion.div 
+                      layout
+                      animate={{ x: 0 }}
+                      className="w-4 h-4 rounded-full bg-white shadow-sm"
+                    />
+                  </button>
+                )}
               </div>
             ))}
           </GlassCard>
