@@ -16,13 +16,16 @@ const GlassCard = ({ variant = "default", className, children, ...props }: Glass
 
   return (
     <motion.div
-      className={cn(variants[variant], "rounded-2xl p-4", className)}
+      className={cn(variants[variant], "rounded-[32px] p-6 shadow-liquid", className)}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
       {...props}
     >
-      {children}
+      <div className="absolute inset-0 z-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+      <div className="relative z-10 w-full h-full">
+        {children}
+      </div>
     </motion.div>
   );
 };

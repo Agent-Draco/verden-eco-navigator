@@ -11,7 +11,7 @@ interface Vehicle3DProps {
 }
 
 // Map of model IDs to their local GLB paths in /public/3D Assets/
-const MODEL_URLS: Record<string, string> = {
+export const MODEL_URLS: Record<string, string> = {
   sedan: '/3D Assets/sedan.glb',
   sedan_sports: '/3D Assets/sedan-sports.glb',
   suv: '/3D Assets/suv.glb',

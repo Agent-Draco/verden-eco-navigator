@@ -1,5 +1,5 @@
 # ChangeLogs
-## 1.0.0 (alpha)
+## 1.0.0 (Alpha)
 - [AA1] (2026-04-07): Project Structurization - Comprehensive documentation of project architecture, dependencies, and directory structures.
 
 ## 1.0.1 (Stable Release 1)

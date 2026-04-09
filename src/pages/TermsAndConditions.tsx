@@ -6,12 +6,16 @@ const TermsAndConditions = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="mobile-container overflow-y-auto bg-background p-6 hide-scrollbar relative z-10">
+    <div className="mobile-container overflow-y-auto p-6 hide-scrollbar relative z-10">
       <div className="flex items-center gap-4 mb-8">
-        <button onClick={() => navigate(-1)} className="p-2 glass rounded-xl text-foreground hover:bg-muted/50 transition-colors">
+        <button 
+          onClick={() => navigate(-1)} 
+          className="p-2 rounded-xl text-foreground hover:bg-muted/50 transition-colors"
+          aria-label="Go back"
+        >
           <ArrowLeft size={20} />
         </button>
-        <h1 className="text-2xl font-black font-display text-foreground drop-shadow-md">Terms & Conditions</h1>
+        <h1 className="text-2xl font-black font-display text-foreground">Terms &amp; Conditions</h1>
       </div>
 
       <GlassCard className="p-6 space-y-6">

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import GlassCard from './GlassCard';
 import GlassButton from './GlassButton';
 import Vehicle3D from './Vehicle3D';
@@ -76,6 +77,7 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({
             <button 
               onClick={onClose}
               className="p-2 hover:bg-muted rounded-full transition-colors"
+              aria-label="Close selection"
             >
               <X size={24} />
             </button>
@@ -115,9 +117,18 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({
               {colors.map((c) => (
                 <button
                   key={c.name}
-                  className={React.useMemo(() => `w-10 h-10 rounded-full border-4 transition-all shadow-lg flex items-center justify-center ${selectedColor === c.value ? 'scale-110 border-primary' : 'border-transparent'}`, [selectedColor, c.value])}
-                  style={{ backgroundColor: c.value }}
+                  className={cn(
+                    "w-10 h-10 rounded-full border-4 transition-all shadow-lg flex items-center justify-center",
+                    selectedColor === c.value ? "scale-110 border-primary" : "border-transparent",
+                    c.name === 'Blue' && "bg-[#3b82f6]",
+                    c.name === 'Red' && "bg-[#ef4444]",
+                    c.name === 'Yellow' && "bg-[#f59e0b]",
+                    c.name === 'Green' && "bg-[#10b981]",
+                    c.name === 'White' && "bg-[#ffffff]",
+                    c.name === 'Black' && "bg-[#18181b]"
+                  )}
                   onClick={() => setSelectedColor(c.value)}
+                  aria-label={`Select ${c.name} color`}
                 >
                   {selectedColor === c.value && <Check size={18} className={c.name === 'White' ? 'text-black' : 'text-white'} />}
                 </button>

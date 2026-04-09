@@ -89,8 +89,7 @@ const Customize = () => {
   }, [appTheme, setSystemTheme]);
 
   return (
-    <div className="relative w-full h-full p-4 pb-32 overflow-y-auto flex flex-col items-center">
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-verden-lavender/5 blur-[120px] pointer-events-none" />
+    <div className="mobile-container p-4 pb-32 flex flex-col items-center">
 
       <div className="w-full max-w-[1400px] flex flex-col min-h-full">
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-muted-foreground mb-8 hover:text-foreground transition-colors group w-fit">

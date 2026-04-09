@@ -18,8 +18,8 @@ const Profile = () => {
   const menuItems = [
     { icon: Car, label: "Vehicle Profile", path: "/vehicle", detail: "Setup" },
     { icon: Palette, label: "Customize", path: "/customize", detail: "" },
-    { icon: Crown, label: "Membership", path: "#", detail: tier },
-    { icon: Settings, label: "Settings", path: "#", detail: "" },
+    { icon: Crown, label: "Membership", path: "/membership", detail: tier },
+    { icon: Settings, label: "Settings", path: "/settings", detail: "" },
     { icon: FileText, label: "Terms & Conditions", path: "/terms", detail: "" },
     { icon: Shield, label: "Privacy Policy", path: "/privacy", detail: "" },
   ];
@@ -30,7 +30,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="relative w-full h-full p-5 pb-32 overflow-y-auto">
+    <div className="relative w-full p-5 pb-32">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[250px] h-[250px] rounded-full bg-verden-lavender/10 blur-[80px] pointer-events-none" />
 
       <div className="flex items-center gap-4 mb-8">
@@ -78,20 +78,20 @@ const Profile = () => {
 
       <div className="space-y-2">
         {menuItems.map((item) => (
-          <GlassCard
+          <div
             key={item.label}
-            className="flex items-center gap-3 cursor-pointer px-4 py-3 hover:bg-muted/50 hover:translate-x-1 transition-all"
+            className="flex items-center gap-3 cursor-pointer px-4 py-4 rounded-2xl bg-muted/30 hover:bg-muted/50 hover:translate-x-1 transition-all border border-border/40"
             onClick={() => item.path !== "#" && navigate(item.path)}
           >
             <item.icon size={18} className="text-primary shrink-0" />
             <span className="flex-1 text-sm font-medium text-foreground">{item.label}</span>
             {item.detail && <span className="text-xs text-muted-foreground">{item.detail}</span>}
             <ChevronRight size={16} className="text-muted-foreground opacity-50" />
-          </GlassCard>
+          </div>
         ))}
 
-        <GlassCard
-          className="flex items-center gap-3 cursor-pointer px-4 py-3 hover:bg-muted/50 hover:translate-x-1 transition-all"
+        <div
+          className="flex items-center gap-3 cursor-pointer px-4 py-4 rounded-2xl bg-muted/30 hover:bg-muted/50 hover:translate-x-1 transition-all border border-border/40"
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
         >
           {theme === "dark" ? <Sun size={18} className="text-primary shrink-0" /> : <Moon size={18} className="text-primary shrink-0" />}
@@ -99,21 +99,21 @@ const Profile = () => {
             {theme === "dark" ? "Light Mode" : "Dark Mode"}
           </span>
           <ChevronRight size={16} className="text-muted-foreground opacity-10" />
-        </GlassCard>
+        </div>
 
-        <GlassCard
-          className="flex items-center gap-3 cursor-pointer px-4 py-3 hover:bg-destructive/10 hover:translate-x-1 transition-all group"
+        <div
+          className="flex items-center gap-3 cursor-pointer px-4 py-4 rounded-2xl bg-muted/30 hover:bg-destructive/10 hover:translate-x-1 transition-all border border-border/40 group"
           onClick={handleLogout}
         >
           <LogOut size={18} className="text-destructive shrink-0" />
           <span className="flex-1 text-sm font-medium text-destructive">Sign Out</span>
           <ChevronRight size={16} className="text-destructive opacity-10 group-hover:opacity-50 transition-opacity" />
-        </GlassCard>
+        </div>
       </div>
 
       <div className="flex items-center justify-center gap-2 mt-10 opacity-40">
         <img src={verdenLogo} alt="Verden" className="w-5 h-5 grayscale" />
-        <span className="font-display text-xs text-muted-foreground">Verden v1.0</span>
+        <span className="font-display text-xs text-muted-foreground">Verden v2.0.0 (Beta)</span>
       </div>
     </div>
   );

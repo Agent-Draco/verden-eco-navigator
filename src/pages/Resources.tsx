@@ -67,7 +67,7 @@ const Resources = () => {
   ];
 
   return (
-    <div className="relative w-full h-full p-6 pb-32 overflow-y-auto flex flex-col items-center">
+    <div className="relative w-full h-full p-6 pb-32 overflow-y-auto flex flex-col items-center bg-abstract">
       <div className="w-full max-w-2xl">
         <header className="flex items-center gap-4 mb-10">
           <GlassButton 
