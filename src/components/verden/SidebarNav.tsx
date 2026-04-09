@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Map, Leaf, Users, Wallet, User, Menu, BookOpen, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { useApp } from "@/contexts/AppContext";
 
 const navItems = [
   { icon: Map, label: "Map", path: "/home" },
@@ -15,12 +16,18 @@ const navItems = [
 const SidebarNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isNavHidden } = useApp() || { isNavHidden: false };
+
+  if (isNavHidden || location.pathname === '/navigation') return null;
 
   return (
     <div className="hidden md:flex flex-col items-center py-6 w-20 border-r border-border bg-background/80 backdrop-blur-xl h-screen z-[50] shrink-0">
       {/* Top Logo/Menu Area */}
       <div className="mb-8">
-        <button className="p-3 rounded-2xl hover:bg-muted text-muted-foreground transition-colors">
+        <button 
+          className="p-3 rounded-2xl hover:bg-muted text-muted-foreground transition-colors"
+          aria-label="Toggle menu"
+        >
           <Menu size={24} />
         </button>
       </div>
@@ -65,6 +72,7 @@ const SidebarNav = () => {
         <button 
           onClick={() => navigate('/customize')}
           className="p-3 rounded-2xl text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          aria-label="Open settings"
         >
           <Settings size={22} />
         </button>

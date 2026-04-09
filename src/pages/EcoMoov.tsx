@@ -61,34 +61,82 @@ const EcoMoov = () => {
   const renderCalendar = () => {
     const month = currentDate.toLocaleString('default', { month: 'long' });
     const year = currentDate.getFullYear();
+    
+    // Calculate days for the grid
+    const firstDayOfMonth = new Date(year, currentDate.getMonth(), 1).getDay();
+    const daysInMonth = new Date(year, currentDate.getMonth() + 1, 0).getDate();
+    
+    // Adjust for Monday start (0=Sun, 1=Mon... in JS Date, but our weekDays starts with Mon)
+    const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+    
+    const prevMonthDays = new Date(year, currentDate.getMonth(), 0).getDate();
+    const calendarDays = [];
+    
+    // Add prev month days
+    for (let i = startOffset - 1; i >= 0; i--) {
+      calendarDays.push({ day: prevMonthDays - i, current: false });
+    }
+    // Add current month days
+    const todayNum = new Date().getDate();
+    const isThisMonth = new Date().getMonth() === currentDate.getMonth() && new Date().getFullYear() === currentDate.getFullYear();
+    
+    for (let i = 1; i <= daysInMonth; i++) {
+      calendarDays.push({ day: i, current: true, isToday: isThisMonth && i === todayNum });
+    }
+    
+    // Fill remaining days to make complete weeks (rows of 7)
+    const remaining = 42 - calendarDays.length; 
+    for (let i = 1; i <= remaining; i++) {
+      calendarDays.push({ day: i, current: false });
+    }
 
     return (
       <GlassCard className="p-4 shadow-lg border-primary/5">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-4">
           <h3 className="font-display font-semibold text-foreground">{month} {year}</h3>
-          <div className="flex gap-1">
-            <GlassButton size="icon" variant="glass" onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)))}><ChevronLeft size={16}/></GlassButton>
-            <GlassButton size="icon" variant="glass" onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)))}><ChevronRight size={16}/></GlassButton>
+          <div className="flex gap-2">
+            <GlassButton 
+              size="icon" 
+              variant="glass" 
+              className="w-8 h-8 rounded-full"
+              onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)))}
+            >
+              <ChevronLeft size={16}/>
+            </GlassButton>
+            <GlassButton 
+              size="icon" 
+              variant="glass" 
+              className="w-8 h-8 rounded-full"
+              onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)))}
+            >
+              <ChevronRight size={16}/>
+            </GlassButton>
           </div>
         </div>
-        <div className="grid grid-cols-7 text-center text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
+        
+        <div className="grid grid-cols-7 text-center text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50 mb-2">
           {weekDays.map(day => <div key={day}>{day}</div>)}
         </div>
-        <div className="grid grid-cols-7 text-center text-sm mt-2 font-medium">
-          <div className="p-1 text-muted-foreground/30">29</div>
-          <div className="p-1 text-muted-foreground/30">30</div>
-          <div className="p-1 text-foreground/80">1</div>
-          <div className="p-1 text-foreground/80">2</div>
-          <div className="p-1 rounded-xl bg-primary/20 border border-primary/40 text-primary font-bold shadow-[0_0_15px_rgba(var(--primary-rgb),0.2)]">3</div>
-          <div className="p-1 text-foreground/80">4</div>
-          <div className="p-1 text-foreground/80">5</div>
+        
+        <div className="grid grid-cols-7 gap-y-2 text-center text-sm font-medium">
+          {calendarDays.slice(0, 35).map((d, i) => (
+            <div key={i} className="flex items-center justify-center p-0.5">
+              <div className={cn(
+                "w-8 h-8 flex items-center justify-center rounded-xl transition-all",
+                d.isToday ? "bg-primary text-primary-foreground font-black shadow-lg shadow-primary/20" : 
+                d.current ? "text-foreground/80 hover:bg-white/10 cursor-pointer" : "text-muted-foreground/20"
+              )}>
+                {d.day}
+              </div>
+            </div>
+          ))}
         </div>
       </GlassCard>
     )
   }
 
   return (
-    <div className="relative w-full h-full p-5 pb-32 overflow-y-auto">
+    <div className="relative w-full p-5 pb-32">
       <div className="absolute top-0 right-0 w-[300px] h-[300px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
       
       <h1 className="font-display text-3xl font-bold mb-1 text-foreground">EcoMoov</h1>

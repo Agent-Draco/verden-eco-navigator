@@ -8,7 +8,7 @@ const Credits = () => {
   const tierProgress = Math.min(100, (credits / 300) * 100);
 
   return (
-    <div className="relative w-full h-full p-5 pb-32 overflow-y-auto">
+    <div className="relative w-full p-5 pb-32 bg-topographic">
       <div className="absolute top-0 right-0 w-[250px] h-[250px] rounded-full bg-verden-neon/8 blur-[80px] pointer-events-none" />
 
       <h1 className="font-display text-2xl font-bold text-foreground mb-6">Green Credits</h1>
