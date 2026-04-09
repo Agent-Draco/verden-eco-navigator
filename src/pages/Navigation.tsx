@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Flag, Clock, Navigation2, AlertCircle, MapPin, ChevronRight, Share2, Printer } from 'lucide-react';
+import { ArrowLeft, Flag, Clock, Navigation2, AlertCircle, MapPin, ChevronRight, Share2, Printer, Search } from 'lucide-react';
+import { formatInstruction } from '@/lib/navLabelRanker';
 import GlassButton from '@/components/verden/GlassButton';
 import GlassCard from '@/components/verden/GlassCard';
 import Map from '@/components/verden/Map';
@@ -15,28 +16,17 @@ import AvatarSelector from '@/components/verden/AvatarSelector';
 
 const FALLBACK_SPEED_MS = 13.89; // 50 km/h fallback for ETA when stationary
 
-/** Converts OSRM step into a human-readable instruction */
-function parseInstruction(step: any): string {
-  if (!step) return 'Continue on route';
-  const type: string = step.maneuver?.type ?? '';
-  const modifier: string = step.maneuver?.modifier ?? '';
-  const street = step.name ? `onto ${step.name}` : '';
-  const dirs: Record<string, string> = {
-    left: 'left', right: 'right',
-    'slight left': 'slight left', 'slight right': 'slight right',
-    'sharp left': 'sharp left', 'sharp right': 'sharp right',
-    uturn: 'U-turn', straight: 'straight',
-  };
-  const dir = dirs[modifier] ?? modifier;
-  if (type === 'depart') return `Head ${dir} ${street}`.trim();
-  if (type === 'arrive') return 'You have arrived';
-  if (type === 'turn') return `Turn ${dir} ${street}`.trim();
-  if (type === 'continue') return `Continue ${dir} ${street}`.trim();
-  if (type === 'roundabout') return 'Enter the roundabout';
-  if (type === 'exit roundabout') return `Exit the roundabout ${street}`.trim();
-  if (type === 'merge') return `Merge ${dir} ${street}`.trim();
-  if (type === 'fork') return `Keep ${dir} at the fork ${street}`.trim();
-  return `${type} ${dir} ${street}`.trim();
+/**
+ * Converts an OSRM step into a human-readable instruction.
+ * Uses navLabelRanker to resolve the highest-priority place label
+ * (shop > building > area > city > highway) for the "onto ..." phrase.
+ *
+ * @param step       - OSRM route step
+ * @param nearbyPOIs - Optional Nominatim results near the maneuver point
+ *                     (pass them here when reverse-geocoding is available)
+ */
+function parseInstruction(step: any, nearbyPOIs: any[] = []): string {
+  return formatInstruction(step, nearbyPOIs);
 }
 
 /** Utility for class merging */
@@ -63,7 +53,14 @@ const Navigation = () => {
   const activeInstruction = useMemo(() => parseInstruction(steps[currentStepIndex] ?? null), [steps, currentStepIndex]);
 
   const [isAvatarSelectorOpen, setIsAvatarSelectorOpen] = useState(false);
-  const { selectedVehicle, setVehicle } = useApp();
+  const { selectedVehicle, setVehicle, setNavHidden } = useApp();
+  const [isVoiceMuted, setIsVoiceMuted] = useState(false);
+
+  // Hide nav during navigation
+  useEffect(() => {
+    setNavHidden(true);
+    return () => setNavHidden(false);
+  }, []);
 
   // Guard
   useEffect(() => { if (!route) navigate('/home'); }, [route, navigate]);
@@ -134,10 +131,14 @@ const Navigation = () => {
           <p className="text-sm text-muted-foreground mb-4">via Best route now due to traffic conditions</p>
 
           <div className="flex items-center gap-2">
-            <button className="flex-1 py-1.5 px-3 rounded-full border border-border text-xs font-bold hover:bg-muted transition-colors flex items-center justify-center gap-2">
+            <button 
+              onClick={() => alert("Route sent to your phone! 📱")}
+              className="flex-1 py-1.5 px-3 rounded-full border border-border text-xs font-bold hover:bg-muted transition-colors flex items-center justify-center gap-2"
+            >
               <Share2 size={14} /> Send to phone
             </button>
             <button 
+              onClick={() => window.print()}
               className="p-2 rounded-full border border-border hover:bg-muted font-bold"
               aria-label="Print directions"
             >
@@ -246,13 +247,29 @@ const Navigation = () => {
 
         {/* Floating Actions (Right Side) */}
         <div className="absolute right-4 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-4">
-          <GlassButton className="w-14 h-14 p-0 rounded-full shadow-liquid glass border-white/20">
+          <GlassButton 
+            onClick={() => alert("Search along route feature coming soon!")}
+            className="w-14 h-14 p-0 rounded-full shadow-liquid glass border-white/20"
+          >
             <Search size={24} strokeWidth={2.5} />
           </GlassButton>
-          <GlassButton className="w-14 h-14 p-0 rounded-full shadow-liquid glass border-white/20">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+          <GlassButton 
+            onClick={() => setIsVoiceMuted(!isVoiceMuted)}
+            className={cn(
+              "w-14 h-14 p-0 rounded-full shadow-liquid border-white/20",
+              isVoiceMuted ? "bg-destructive text-white" : "glass"
+            )}
+          >
+            {isVoiceMuted ? (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+            ) : (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+            )}
           </GlassButton>
-          <GlassButton className="w-14 h-14 p-0 rounded-full shadow-liquid bg-[#fdbd2d] text-black border-none font-black text-2xl">
+          <GlassButton 
+            onClick={() => alert("Incident report menu opened. Stay safe!")}
+            className="w-14 h-14 p-0 rounded-full shadow-liquid bg-[#fdbd2d] text-black border-none font-black text-2xl active:scale-90 transition-transform"
+          >
              !
           </GlassButton>
         </div>

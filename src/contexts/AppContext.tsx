@@ -20,6 +20,7 @@ interface AppState {
   joinedGroups: string[];
   vehicleSetup: boolean;
   lastGreenestRoute: any;
+  isNavHidden: boolean;
 }
 
 interface AppContextType extends AppState {
@@ -35,6 +36,7 @@ interface AppContextType extends AppState {
   unlockVehicle: (model: string, cost: number) => boolean;
   completeVehicleSetup: () => void;
   setLastGreenestRoute: (route: any, isGreenest: boolean) => void;
+  setNavHidden: (hidden: boolean) => void;
   showReward: string | null;
   clearReward: () => void;
 }
@@ -52,11 +54,21 @@ const defaultState: AppState = {
   unlockedThemes: ["default"],
   selectedVehicle: { model: 'sedan', color: '#22c55e' },
   unlockedVehicles: ['sedan', 'suv', 'bike'],
-  badges: [],
+  badges: [
+    { name: "Eco Starter", earned: true },
+    { name: "First Trip", earned: true },
+    { name: "Clean Commuter", earned: false },
+    { name: "Tree Planter", earned: false },
+    { name: "Carbon Neutral", earned: false },
+    { name: "Group Leader", earned: false },
+    { name: "Fast & Green", earned: false },
+    { name: "Global Saver", earned: false },
+  ],
   transactions: [],
   joinedGroups: [],
   vehicleSetup: false,
   lastGreenestRoute: null,
+  isNavHidden: false,
 };
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -330,6 +342,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         unlockVehicle,
         completeVehicleSetup,
         setLastGreenestRoute,
+        setNavHidden: (hidden: boolean) => save({ ...state, isNavHidden: hidden }),
         showReward,
         clearReward: () => setShowReward(null),
       }}

@@ -32,7 +32,7 @@ const Login = () => {
   };
 
   return (
-    <div className="mobile-container bg-abstract">
+    <div className="mobile-container">
       <div className="relative z-10 flex flex-col min-h-screen px-8 pt-20 pb-12">
         <motion.div
           initial={{ opacity: 0, y: -20 }}

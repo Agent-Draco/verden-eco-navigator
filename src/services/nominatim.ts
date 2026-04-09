@@ -75,7 +75,7 @@ export const searchPlaces = async (query: string, userLocation?: [number, number
       .from('places_cache')
       .select('*')
       .ilike('search_query', query)
-      .limit(10);
+      .limit(20);
 
     if (!cacheError && cachedResults && cachedResults.length > 0) {
       console.log('Using cached results for:', query);
@@ -107,7 +107,7 @@ export const searchPlaces = async (query: string, userLocation?: [number, number
     q: query,
     format: 'json',
     addressdetails: '1',
-    limit: '15',
+    limit: '20',
     countrycodes: 'in', // Priority for India
     'accept-language': 'en',
   });

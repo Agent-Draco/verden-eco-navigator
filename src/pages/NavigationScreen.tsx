@@ -39,6 +39,7 @@ const NavigationScreen = () => {
         bearing={bearing}
         speedKmh={speedKmh}
         vehicle={selectedVehicle}
+        route={route}
       />
       <div className="absolute top-0 left-0 right-0 z-10 p-4">
         <GlassCard>
