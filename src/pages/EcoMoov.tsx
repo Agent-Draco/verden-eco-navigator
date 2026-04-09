@@ -7,6 +7,7 @@ import GlassButton from "@/components/verden/GlassButton";
 import { useApp } from "@/contexts/AppContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/services/supabase";
+import { cn } from "@/lib/utils";
 
 const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
