@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Leaf, Flame, Trophy, Target, TrendingUp } from "lucide-react";
-import GlassCard from "@/components/verden/GlassCard";
+import { GlassCard } from "@/components/verden/GlassCard";
 import { useApp } from "@/contexts/AppContext";
 
 const Credits = () => {

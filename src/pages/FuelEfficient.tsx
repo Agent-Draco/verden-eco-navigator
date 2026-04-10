@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Fuel, DollarSign, Gauge, Leaf } from "lucide-react";
-import GlassCard from "@/components/verden/GlassCard";
-import GlassButton from "@/components/verden/GlassButton";
+import { GlassCard } from "@/components/verden/GlassCard";
+import { GlassButton } from "@/components/verden/GlassButton";
 import MapBackground from "@/components/verden/MapBackground";
 
 const FuelEfficient = () => {

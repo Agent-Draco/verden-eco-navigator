@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Mail, ArrowLeft, CheckCircle } from "lucide-react";
-import GlassCard from "@/components/verden/GlassCard";
-import GlassButton from "@/components/verden/GlassButton";
+import { GlassCard } from "@/components/verden/GlassCard";
+import { GlassButton } from "@/components/verden/GlassButton";
 import verdenLogo from "@/assets/verden-logo.png";
 
 const ForgotPassword = () => {

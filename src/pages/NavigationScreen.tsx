@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Clock, Navigation, Wind, Layers } from 'lucide-react';
-import GlassCard from '@/components/verden/GlassCard';
+import { GlassCard } from '@/components/verden/GlassCard';
 import CesiumViewer from '@/components/verden/CesiumViewer';
 import { useGeoNavigation } from '@/hooks/useGeoNavigation';
 import { useApp } from '@/contexts/AppContext';
