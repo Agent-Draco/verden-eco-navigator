@@ -37,6 +37,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const createFallbackUser = (supabaseUser: SupabaseUser): User => ({
+    id: supabaseUser.id,
+    name: supabaseUser.user_metadata?.name || 'Eco Warrior',
+    email: supabaseUser.email || '',
+    avatar: 'default',
+    memberSince: new Date().toLocaleDateString(),
+    credits: 0,
+    eco_score: 0,
+    theme: 'default',
+  });
+
   useEffect(() => {
     let mounted = true;
     let initialized = false;
@@ -86,7 +97,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  const fetchUserProfile = async (supabaseUser: SupabaseUser): Promise<User | null> => {
+  const fetchUserProfile = async (supabaseUser: SupabaseUser): Promise<User> => {
     try {
         const { data, error, status } = await supabase
             .from('users')
@@ -139,22 +150,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             } else if (insertError) {
                 console.error('Failed to auto-repair missing public.user profile:', insertError);
             }
+
+            console.warn('Falling back to a local user profile because no profile row was returned.');
+            return createFallbackUser(supabaseUser);
         }
     } catch (error) {
         console.error('Error fetching user profile:', error);
         // Immediate fallback to prevent hanging the UI
-        return {
-          id: supabaseUser.id,
-          name: supabaseUser.user_metadata?.name || 'Eco Warrior',
-          email: supabaseUser.email || '',
-          avatar: 'default',
-          memberSince: new Date().toLocaleDateString(),
-          credits: 0,
-          eco_score: 0,
-          theme: 'default',
-        };
+        return createFallbackUser(supabaseUser);
     }
-    return null;
+    return createFallbackUser(supabaseUser);
   };
 
   const signup = async (name: string, email: string, password:string) => {
