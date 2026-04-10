@@ -24,30 +24,37 @@ const EcoMoov = () => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // Fetch all available commute matches
-        const { data: matchesData } = await supabase
+        // Prepare parallel queries
+        const matchesPromise = supabase
           .from('commute_matches')
           .select('*')
           .order('match_score', { ascending: false });
-        
-        if (matchesData) setMatches(matchesData);
 
-        // Fetch groups where the user is a member
+        let memberOfPromise = null;
         if (user) {
-          const { data: memberOf } = await supabase
+          memberOfPromise = supabase
             .from('group_members')
             .select('group_id')
             .eq('user_id', user.id);
+        }
+
+        // Execute independent queries in parallel
+        const [matchesResult, memberOfResult] = await Promise.all([
+          matchesPromise,
+          memberOfPromise
+        ]);
+
+        if (matchesResult.data) setMatches(matchesResult.data);
+
+        // Process memberOfResult if it exists
+        if (memberOfResult && memberOfResult.data && memberOfResult.data.length > 0) {
+          const groupIds = memberOfResult.data.map(m => m.group_id);
+          const { data: groupsData } = await supabase
+            .from('groups')
+            .select('*')
+            .in('id', groupIds);
           
-          if (memberOf && memberOf.length > 0) {
-            const groupIds = memberOf.map(m => m.group_id);
-            const { data: groupsData } = await supabase
-              .from('groups')
-              .select('*')
-              .in('id', groupIds);
-            
-            if (groupsData) setGroups(groupsData);
-          }
+          if (groupsData) setGroups(groupsData);
         }
       } catch (error) {
         console.error("Error fetching EcoMoov data:", error);
