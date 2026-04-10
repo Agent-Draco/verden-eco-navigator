@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, X, Clock, MapPin, Zap } from "lucide-react";
-import GlassCard from "./GlassCard";
-import GlassButton from "./GlassButton";
+import {GlassCard} from "./GlassCard";
+import {GlassButton} from "./GlassButton";
 
 interface SearchOverlayProps {
   isOpen: boolean;
@@ -15,7 +15,7 @@ interface SearchOverlayProps {
   isSearching: boolean;
 }
 
-const SearchOverlay = ({
+export const SearchOverlay = ({
   isOpen,
   onClose,
   query,
@@ -186,5 +186,3 @@ const SearchOverlay = ({
     </AnimatePresence>
   );
 };
-
-export default SearchOverlay;

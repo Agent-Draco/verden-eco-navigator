@@ -30,3 +30,6 @@
 - [FIX-005] (2026-04-09): Resolved TypeScript errors in `VehicleEntityController.ts` by correctly instantiating `TranslationRotationScale` for `nodeTransformations`, ensuring type compatibility with CesiumJS.
 - [META-001] (2026-04-09): Instructions Documentation Overhaul - Refactored `Meta/Instructions.md` for improved clarity, formatting, and structural organization.
 - [DOC-001] (2026-04-09): Project README Overhaul - Replaced placeholder with a comprehensive, professionally formatted `README.md`.
+
+## Version 2.0.3 (Exhibition Page)
+- [FIX-006] (2026-04-09): Corrected vehicle model orientation and rendering by removing manual orientation overrides and applying a static correction at the model level.
