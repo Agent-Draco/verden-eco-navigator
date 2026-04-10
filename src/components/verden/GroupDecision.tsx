@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Car, Share2, Bus, Sparkles } from "lucide-react";
-import GlassCard from "./GlassCard";
-import GlassButton from "./GlassButton";
+import { GlassCard } from "./GlassCard";
+import { GlassButton } from "./GlassButton";
 
 const GroupDecision = ({ decision, setGroup }) => {
 

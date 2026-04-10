@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { User, Wallet, Car, Crown, ChevronRight, Palette, Settings, LogOut, Moon, Sun, FileText, Shield } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
-import GlassCard from "@/components/verden/GlassCard";
+import { GlassCard } from "@/components/verden/GlassCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useApp } from "@/contexts/AppContext";
 import verdenLogo from "@/assets/verden-logo.png";

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Car, Check, Loader, User } from 'lucide-react';
-import GlassCard from './GlassCard';
-import GlassButton from './GlassButton';
+import { GlassCard } from './GlassCard';
+import { GlassButton } from './GlassButton';
 
 const rideOptions = [
     { type: 'Economy', seats: 4, priceFactor: 1, icon: <Car/> },
