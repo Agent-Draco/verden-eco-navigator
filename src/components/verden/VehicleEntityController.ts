@@ -47,7 +47,6 @@ export class VehicleEntityController {
     // Unity to Cesium Frame Alignment: +Z forward -> +X forward
     const correctionMatrix = Cesium.Matrix3.fromRotationY(Cesium.Math.toRadians(-90));
     const correctionQuaternion = Cesium.Quaternion.fromRotationMatrix(correctionMatrix);
->>>>>>> parent of 08f2686 (Version 2.0.2 (Stable Release 3))
 
     this.entity = this.viewer.entities.add({
       name: 'Navigation Vehicle',
@@ -60,29 +59,12 @@ export class VehicleEntityController {
         uri: url,
         minimumPixelSize: 64, // Baseline visibility
         maximumScale: 20000,
-<<<<<<< HEAD
-
-        // STATIC correction for the model's intrinsic orientation.
-        // This rotates the model within its own reference frame to align it
-        // with Cesium's East-North-Up (ENU) convention (X-forward).
-        nodeTransformations: {
-          root: {
-            rotation: Cesium.Quaternion.fromHeadingPitchRoll(
-              new Cesium.HeadingPitchRoll(
-                Cesium.Math.toRadians(90), // Align model's original Y-forward to Cesium's X-forward
-                0,
-                Cesium.Math.toRadians(90)  // Align model's original Z-up to Cesium's Y-up
-              )
-            ),
-          },
-=======
         
         // Use nodeTransformations for axis correction (+Z forward -> +X forward)
         nodeTransformations: {
           'root': {
             rotation: new Cesium.ConstantProperty(correctionQuaternion)
           }
->>>>>>> parent of 08f2686 (Version 2.0.2 (Stable Release 3))
         },
 
         // Silhouette for premium edge visibility
