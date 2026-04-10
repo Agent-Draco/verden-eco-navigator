@@ -1,3 +1,18 @@
+### Original Code (`README.md`)
+
+This was the original placeholder content of the `README.md` file.
+
+```markdown
+# Welcome to your project
+
+TODO: Document your project here
+```
+
+### Modified Code (`README.md`)
+
+This is the new, professionally formatted `README.md`.
+
+```markdown
 # Verden Eco-Navigator
 
 **Verden Eco-Navigator** is a next-generation, 3D-enabled navigation application designed for eco-conscious drivers. By providing real-time, high-fidelity visualization of routes and vehicle dynamics, it aims to enhance driver awareness and promote efficient driving habits.
@@ -62,3 +77,4 @@ The project follows a standard Vite + React structure. Key directories include:
 *   `src/lib/`: Core TypeScript libraries and utilities, including Cesium controllers.
 *   `public/`: Static assets like images, fonts, and 3D models.
 *   `Meta/`: Project-related metadata, including changelogs and architectural documentation.
+```

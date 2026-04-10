@@ -46,7 +46,7 @@ const Home = () => {
   // ── Sync Navbar Visibility ────────────────────────────────────────────────
   useEffect(() => {
     setNavHidden(isOverlayOpen);
-  }, [isOverlayOpen, setNavHidden]);
+  }, [isOverlayOpen]);
 
   // ── Sort Popular Suggestions by Proximity ──────────────────────────────────
   const sortedPopularSuggestions = [...POPULAR_SUGGESTIONS].sort((a, b) => {
