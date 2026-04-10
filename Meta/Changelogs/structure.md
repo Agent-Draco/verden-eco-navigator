@@ -1,4 +1,4 @@
-# Structure.md (.github/Changelogs)
+# Structure.md (Meta/Changelogs)
 
 ## Overview
 This directory stores historical and current version changelogs and detailed reports for each major update.

@@ -4,7 +4,7 @@
 This is the root directory of the Verden Eco-Navigator project. It contains project-wide configuration, environment settings, and basic project metadata.
 
 ## Subfolders
-- **.github** - GitHub-related configurations and project documentation.
+- **Meta** - GitHub-related configurations and project documentation.
 - **public** - Static assets (including 3D models and textures).
 - **src** - The main application source code (React + TypeScript).
 - **supabase** - Supabase configuration and temporary connection files.

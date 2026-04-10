@@ -42,9 +42,20 @@ export class VehicleEntityController {
     // ── Vehicle entity ───────────────────────────────────────────────────────
     const url = MODEL_URLS[vehicle.model] || MODEL_URLS.sedan;
     
-    // Unity to Cesium Frame Alignment: +Z forward -> +X forward
-    const correctionMatrix = Cesium.Matrix3.fromRotationY(Cesium.Math.toRadians(-90));
-    const correctionQuaternion = Cesium.Quaternion.fromRotationMatrix(correctionMatrix);
+    // Correction for Blender/Unity's coordinate system (Y-up, Z-forward)
+    // to Cesium's (Z-up, X-forward)
+    const heading = Cesium.Math.toRadians(90);
+    const pitch = 0;
+    const roll = Cesium.Math.toRadians(90);
+    const hpr = new Cesium.HeadingPitchRoll(heading, pitch, roll);
+    const correctionQuaternion = Cesium.Transforms.headingPitchRollQuaternion(
+      Cesium.Cartesian3.fromDegrees(0, 0, 0), // Center of the model
+      hpr
+    );
+
+    // Create a TranslationRotationScale instance and set its rotation property.
+    const rootNodeTransform = new Cesium.TranslationRotationScale();
+    rootNodeTransform.rotation = new Cesium.ConstantProperty(correctionQuaternion);
 
     this.entity = this.viewer.entities.add({
       name: 'Navigation Vehicle',
@@ -56,11 +67,9 @@ export class VehicleEntityController {
         minimumPixelSize: 64, // Baseline visibility
         maximumScale: 20000,
         
-        // Use nodeTransformations for axis correction (+Z forward -> +X forward)
+        // Use the created TranslationRotationScale instance for the root node.
         nodeTransformations: {
-          'root': {
-            rotation: new Cesium.ConstantProperty(correctionQuaternion)
-          }
+          root: rootNodeTransform
         },
 
         // Silhouette for premium edge visibility
