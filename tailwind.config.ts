@@ -13,9 +13,6 @@ export default {
       },
     },
     extend: {
-      transitionTimingFunction: {
-        'custom-ease': 'cubic-bezier(0.23, 1, 0.32, 1)',
-      },
       fontFamily: {
         display: ['Space Grotesk', 'sans-serif'],
         body: ['DM Sans', 'sans-serif'],

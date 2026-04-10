@@ -4,14 +4,14 @@
 The goal was to implement the `/structurize` workflow to improve project discoverability, document dependencies, and establish a clear directory hierarchy as per the global project instructions.
 
 ## What was Changed
-- Created `Meta/project.md` with a high-level overview and dependency map.
+- Created `.github/project.md` with a high-level overview and dependency map.
 - Created `structure.md` files in **all** project directories (root, src, public, supabase, and their subfolders).
-- Updated `Meta/Changelogs/changelogs.md` with the report code `AA1`.
+- Updated `.github/Changelogs/changelogs.md` with the report code `AA1`.
 - Created this detailed report (`AA1.md`).
 - Conducted exhaustive research into project entry points, state management (AppContext/AuthContext), and external services (Supabase, OSRM, etc.).
 
 ## Result of the Change
-The project now has comprehensive, navigable documentation in each folder. Developers can quickly understand the purpose of any directory and the role of the files within it. The project's architecture is now clearly mapped in `Meta/project.md`.
+The project now has comprehensive, navigable documentation in each folder. Developers can quickly understand the purpose of any directory and the role of the files within it. The project's architecture is now clearly mapped in `.github/project.md`.
 
 ## Inspection & Course of Action
 - Inspected `package.json` for technical stack and dependencies.
@@ -22,7 +22,7 @@ The project now has comprehensive, navigable documentation in each folder. Devel
 
 ## Tests Done
 - Verified that all `structure.md` files are accessible and correctly formatted.
-- Verified that `Meta/project.md` links to key components correctly.
+- Verified that `.github/project.md` links to key components correctly.
 - Verified that the changelog reflects the latest update and maintains the required structure.
 
 ## Overall Understanding

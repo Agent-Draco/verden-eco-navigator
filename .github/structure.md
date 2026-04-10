@@ -1,4 +1,4 @@
-# Structure.md (Meta)
+# Structure.md (.github)
 
 ## Overview
 This directory contains project-specific documentation, GitHub workflow configurations, and instructions for developers.
