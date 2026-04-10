@@ -40,6 +40,12 @@ export const Home = () => {
   const navigate = useNavigate();
   const { credits, setLastGreenestRoute } = useApp();
   const inputRef = useRef<HTMLInputElement>(null);
+  const { credits, setLastGreenestRoute, setNavHidden } = useApp();
+
+  // ── Sync Navbar Visibility ────────────────────────────────────────────────
+  useEffect(() => {
+    setNavHidden(isOverlayOpen);
+  }, [isOverlayOpen, setNavHidden]);
 
   // ── Sort Popular Suggestions by Proximity ──────────────────────────────────
   const sortedPopularSuggestions = [...POPULAR_SUGGESTIONS].sort((a, b) => {

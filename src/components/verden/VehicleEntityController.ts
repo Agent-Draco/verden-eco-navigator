@@ -17,6 +17,10 @@ export class VehicleEntityController {
     this.orientationProperty.forwardExtrapolationType = Cesium.ExtrapolationType.HOLD;
 
     const url = MODEL_URLS[vehicle.model] || MODEL_URLS.sedan;
+    
+    // Unity to Cesium Frame Alignment: +Z forward -> +X forward
+    const correctionMatrix = Cesium.Matrix3.fromRotationY(Cesium.Math.toRadians(-90));
+    const correctionQuaternion = Cesium.Quaternion.fromRotationMatrix(correctionMatrix);
 
     this.entity = this.viewer.entities.add({
       name: 'Navigation Vehicle',
@@ -24,8 +28,19 @@ export class VehicleEntityController {
       orientation: this.orientationProperty,
       model: {
         uri: url,
-        minimumPixelSize: 64,
-        maximumScale: 50,
+        minimumPixelSize: 64, // Baseline visibility
+        maximumScale: 20000,
+        
+        // Use nodeTransformations for axis correction (+Z forward -> +X forward)
+        nodeTransformations: {
+          'root': {
+            rotation: new Cesium.ConstantProperty(correctionQuaternion)
+          }
+        },
+
+        // Silhouette for premium edge visibility
+        silhouetteColor: Cesium.Color.WHITE.withAlpha(0.6),
+        silhouetteSize: 1.0,
       },
     });
   }
