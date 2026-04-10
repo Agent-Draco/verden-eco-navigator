@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import GlassCard from '@/components/verden/GlassCard';
-import GlassButton from '@/components/verden/GlassButton';
+import { GlassCard } from '@/components/verden/GlassCard';
+import { GlassButton } from '@/components/verden/GlassButton';
 import { VerdenLogo } from '@/components/verden/VerdenLogo';
 import { motion } from 'framer-motion';
 import { Star, Leaf, Zap } from 'lucide-react';

@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Leaf, Share2, Award, MapPin, Home } from "lucide-react";
-import GlassCard from "@/components/verden/GlassCard";
-import GlassButton from "@/components/verden/GlassButton";
+import { GlassCard } from "@/components/verden/GlassCard";
+import { GlassButton } from "@/components/verden/GlassButton";
 import { useApp } from "@/contexts/AppContext";
 import { useEffect, useState } from "react";
 
