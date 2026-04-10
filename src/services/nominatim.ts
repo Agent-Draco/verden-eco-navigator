@@ -1,8 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Dedicated Supabase client for search location database (NAVLOCDB)
-const navlocUrl = import.meta.env.VITE_NAVLOCDB_SUPABASE_URL || 'https://tperblyaeuzytcuhveob.supabase.co';
-const navlocAnonKey = import.meta.env.VITE_NAVLOCDB_SUPABASE_ANON_KEY || 'placeholder';
+const navlocUrl = import.meta.env.VITE_NAVLOCDB_SUPABASE_URL;
+const navlocAnonKey = import.meta.env.VITE_NAVLOCDB_SUPABASE_ANON_KEY;
+
+if (!navlocUrl || !navlocAnonKey) {
+  throw new Error('Missing Navloc Supabase environment variables. Please check your .env file.');
+}
 
 export const navlocSupabase = createClient(navlocUrl, navlocAnonKey);
 
