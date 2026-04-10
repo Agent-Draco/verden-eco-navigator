@@ -1,12 +1,11 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { AppProvider } from "@/contexts/AppContext";
 import AuthLayout from "@/components/verden/AuthLayout";
 
 const Home = lazy(() => import("@/pages/Home"));
 const Index = lazy(() => import("@/pages/Index"));
-const LandingPage = lazy(() => import("@/pages/LandingPage"));
 const Navigation = lazy(() => import("@/pages/Navigation"));
 const TripSummary = lazy(() => import("@/pages/TripSummary"));
 const Profile = lazy(() => import("@/pages/Profile"));
@@ -23,19 +22,6 @@ const TermsAndConditions = lazy(() => import("@/pages/TermsAndConditions"));
 const PrivacyPolicy = lazy(() => import("@/pages/PrivacyPolicy"));
 const Resources = lazy(() => import("@/pages/Resources"));
 
-const Root = () => {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  return user ? <AuthLayout><Home /></AuthLayout> : <LandingPage />;
-};
 
 const App = () => {
   return (
@@ -48,7 +34,7 @@ const App = () => {
         <AuthProvider>
           <AppProvider>
             <Routes>
-              <Route path="/" element={<Root />} />
+              <Route path="/" element={<AuthLayout><Home /></AuthLayout>} />
               <Route path="/home" element={<AuthLayout><Home /></AuthLayout>} />
               <Route path="/navigation" element={<AuthLayout><Navigation /></AuthLayout>} />
               <Route path="/trip-summary" element={<AuthLayout><TripSummary /></AuthLayout>} />

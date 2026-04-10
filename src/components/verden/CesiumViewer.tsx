@@ -105,6 +105,58 @@ const CesiumViewer: React.FC<CesiumViewerProps> = ({
     }
   }, [userLocation, bearing, speedKmh]);
 
+  // 4. Handle Route Rendering (Terrain Aligned 3D Polyline)
+  useEffect(() => {
+    if (!viewerRef.current || !route?.geometry?.coordinates) return;
+
+    const renderRoute = async () => {
+      const viewer = viewerRef.current;
+      if (!viewer) return;
+
+      // 1. Clear existing route
+      if (routeEntityRef.current) {
+        viewer.entities.remove(routeEntityRef.current);
+        routeEntityRef.current = null;
+      }
+
+      // 2. Flatten and convert to Cartographic for terrain sampling
+      const rawCoords = route.geometry.coordinates; // [[lon, lat], ...]
+      const cartographics = rawCoords.map((c: [number, number]) => 
+        Cesium.Cartographic.fromDegrees(c[0], c[1])
+      );
+
+      // 3. Sample Terrain for Manual 3D Alignment (avoids depthFailMaterial bugs)
+      let sampled;
+      try {
+        sampled = await Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, cartographics);
+      } catch (e) {
+        console.warn("Route terrain sampling failed:", e);
+        sampled = cartographics;
+      }
+
+      const positions = sampled.map((c: Cesium.Cartographic) => 
+        Cesium.Cartesian3.fromRadians(c.longitude, c.latitude, (c.height || 0) + 0.5) // Offset 50cm above ground (prevents z-fighting)
+      );
+
+      // 4. Add Premium 3D Route Entity
+      routeEntityRef.current = viewer.entities.add({
+        name: 'Navigation Route',
+        polyline: {
+          positions,
+          width: 8,
+          material: new Cesium.PolylineGlowMaterialProperty({
+            glowPower: 0.2,
+            color: Cesium.Color.CYAN
+          }),
+          // X-ray visibility: Use basic Color for better compatibility in depthFail slot
+          depthFailMaterial: Cesium.Color.CYAN.withAlpha(0.3)
+        }
+      });
+    };
+
+    renderRoute();
+  }, [route]);
+
   return <div ref={containerRef} className="w-full h-full" />;
 };
 
