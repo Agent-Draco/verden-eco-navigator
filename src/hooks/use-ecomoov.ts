@@ -14,6 +14,35 @@ interface HistoricalCommute {
     frequencyPerWeek: number;
 }
 
+interface TripData {
+  user_id: string;
+  start_lat: number | string;
+  start_lon: number | string;
+  end_lat: number | string;
+  end_lon: number | string;
+  departure_time: string;
+}
+
+interface Route {
+  geometry: {
+    coordinates: [number, number][];
+  };
+  duration?: number;
+  distance?: number;
+  [key: string]: unknown; // Allow for other OSRM properties
+}
+
+export interface EcoMoovMatch {
+  id: string;
+  name: string;
+  avatar: string;
+  route: Route;
+  match: number;
+  departureTime: Date;
+  members: number;
+  frequency: number;
+}
+
 // --- Historical Data Aggregation ---
 // In a production environment, this clustering would happen on a backend CRON job.
 // We simulate the "AI scanning an extended period of user trips" by querying the database 
@@ -36,13 +65,13 @@ const fetchHistoricalPatterns = async (): Promise<HistoricalCommute[]> => {
   const userCommutes: HistoricalCommute[] = [];
 
   for (const user of usersData) {
-     const userTrips = tripsData.filter((t: any) => t.user_id === user.id && t.start_lat && t.start_lon);
+     const userTrips = (tripsData as unknown as TripData[]).filter((t) => t.user_id === user.id && t.start_lat && t.start_lon);
      if (userTrips.length === 0) continue;
 
      let avgStartLat = 0, avgStartLon = 0, avgEndLat = 0, avgEndLon = 0;
      let totalHour = 0, totalMinute = 0;
 
-     userTrips.forEach((t: any) => {
+     userTrips.forEach((t) => {
        avgStartLat += Number(t.start_lat);
        avgStartLon += Number(t.start_lon);
        avgEndLat += Number(t.end_lat);
@@ -74,7 +103,7 @@ const fetchHistoricalPatterns = async (): Promise<HistoricalCommute[]> => {
 };
 
 // --- AI Matching Algorithm ---
-const scanHistoricalMatches = async (userRoute: any, userDepartureTime: Date) => {
+const scanHistoricalMatches = async (userRoute: Route | null, userDepartureTime: Date): Promise<EcoMoovMatch[]> => {
   if (!userRoute) return [];
   const userStartCoords = userRoute.geometry.coordinates[0];
   const userEndCoords = userRoute.geometry.coordinates[userRoute.geometry.coordinates.length - 1];
@@ -134,13 +163,13 @@ const scanHistoricalMatches = async (userRoute: any, userDepartureTime: Date) =>
     return null;
   }));
 
-  return generatedMatches.filter(Boolean).sort((a: any, b: any) => b.match - a.match);
+  return (generatedMatches.filter(Boolean) as EcoMoovMatch[]).sort((a, b) => b.match - a.match);
 };
 
 
 // --- Main Hook ---
-const useEcoMoov = (userRoute: any, userDepartureTime: Date) => {
-  const [groups, setGroups] = useState<any[]>([]);
+const useEcoMoov = (userRoute: Route | null, userDepartureTime: Date) => {
+  const [groups, setGroups] = useState<EcoMoovMatch[]>([]);
 
   useEffect(() => {
     let active = true;
