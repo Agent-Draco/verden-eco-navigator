@@ -1,20 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Clock, Navigation, Wind, Layers } from 'lucide-react';
-import { GlassCard } from '@/components/verden/GlassCard';
-import CesiumViewer from '@/components/verden/CesiumViewer';
+import { Clock, Navigation, Wind } from 'lucide-react';
+import GlassCard from '@/components/verden/GlassCard';
+import Map from '@/components/verden/Map';
 import { useGeoNavigation } from '@/hooks/useGeoNavigation';
-import { useApp } from '@/contexts/AppContext';
 
 const NavigationScreen = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { route } = location.state || {}; // Destination is not strictly required for rendering since routing is pre-determined
-  const { location: userLocation, bearing, speedKmh } = useGeoNavigation();
+  const { route, destination } = location.state || {};
+  const { location: userLocation, bearing } = useGeoNavigation();
   const [remainingTime, setRemainingTime] = useState(route ? route.duration : 0);
   const [remainingDistance, setRemainingDistance] = useState(route ? route.distance : 0);
-  const { selectedVehicle } = useApp();
 
   useEffect(() => {
     if (!route) {
@@ -34,11 +32,11 @@ const NavigationScreen = () => {
 
   return (
     <div className="mobile-container bg-background">
-      <CesiumViewer 
-        userLocation={userLocation}
-        bearing={bearing}
-        speedKmh={speedKmh}
-        vehicle={selectedVehicle}
+      <Map 
+        activeRoute={route} 
+        userLocation={userLocation} 
+        bearing={bearing} 
+        destination={destination}
       />
       <div className="absolute top-0 left-0 right-0 z-10 p-4">
         <GlassCard>
@@ -78,6 +76,7 @@ const NavigationScreen = () => {
         </GlassCard>
        </motion.div>
       </div>
+
     </div>
   );
 };
