@@ -27,7 +27,7 @@ const Settings = () => {
   return (
     <div className="relative w-full p-5 pb-32 bg-topographic">
       <div className="absolute top-0 right-0 w-[400px] h-[400px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
-      
+
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="font-display text-3xl font-bold text-foreground">Settings</h1>
@@ -82,7 +82,7 @@ const Settings = () => {
                   <p className="text-sm font-medium text-foreground capitalize">{key} Notifications</p>
                 </div>
                 {val ? (
-                  <button 
+                  <button
                     type="button"
                     role="switch"
                     aria-checked="true"
@@ -90,14 +90,14 @@ const Settings = () => {
                     className="w-12 h-6 rounded-full transition-colors relative flex items-center px-1 bg-primary"
                     aria-label={`Toggle ${key} notifications`}
                   >
-                    <motion.div 
+                    <motion.div
                       layout
                       animate={{ x: 24 }}
                       className="w-4 h-4 rounded-full bg-white shadow-sm"
                     />
                   </button>
                 ) : (
-                  <button 
+                  <button
                     type="button"
                     role="switch"
                     aria-checked="false"
@@ -105,7 +105,7 @@ const Settings = () => {
                     className="w-12 h-6 rounded-full transition-colors relative flex items-center px-1 bg-muted"
                     aria-label={`Toggle ${key} notifications`}
                   >
-                    <motion.div 
+                    <motion.div
                       layout
                       animate={{ x: 0 }}
                       className="w-4 h-4 rounded-full bg-white shadow-sm"
@@ -130,11 +130,10 @@ const Settings = () => {
                 <button
                   key={t}
                   onClick={() => setTheme(t)}
-                  className={`p-3 rounded-2xl border transition-all text-xs font-bold capitalize ${
-                    theme === t 
-                      ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20" 
+                  className={`p-3 rounded-2xl border transition-all text-xs font-bold capitalize ${theme === t
+                      ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20"
                       : "bg-white/5 border-white/10 text-muted-foreground hover:border-white/20"
-                  }`}
+                    }`}
                 >
                   {t}
                 </button>
@@ -148,42 +147,42 @@ const Settings = () => {
         <section>
           <h2 className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-4 px-1">System</h2>
           <div className="grid gap-3">
-             <GlassCard className="p-4 flex items-center justify-between cursor-pointer hover:bg-white/5">
-                <div className="flex items-center gap-3">
-                  <Database size={18} className="text-muted-foreground" />
-                  <p className="text-sm font-medium">Clear Search Cache</p>
-                </div>
-                <p className="text-[10px] text-muted-foreground font-mono">1.2 MB</p>
-             </GlassCard>
-             <GlassCard className="p-4 flex items-center justify-between cursor-pointer hover:bg-white/5">
-                <div className="flex items-center gap-3">
-                  <Globe size={18} className="text-muted-foreground" />
-                  <p className="text-sm font-medium">Language</p>
-                </div>
-                <p className="text-[10px] text-primary font-bold">English (US)</p>
-             </GlassCard>
+            <GlassCard className="p-4 flex items-center justify-between cursor-pointer hover:bg-white/5">
+              <div className="flex items-center gap-3">
+                <Database size={18} className="text-muted-foreground" />
+                <p className="text-sm font-medium">Clear Search Cache</p>
+              </div>
+              <p className="text-[10px] text-muted-foreground font-mono">1.2 MB</p>
+            </GlassCard>
+            <GlassCard className="p-4 flex items-center justify-between cursor-pointer hover:bg-white/5">
+              <div className="flex items-center gap-3">
+                <Globe size={18} className="text-muted-foreground" />
+                <p className="text-sm font-medium">Language</p>
+              </div>
+              <p className="text-[10px] text-primary font-bold">English (US)</p>
+            </GlassCard>
           </div>
         </section>
 
         {/* Actions */}
         <div className="pt-4 flex flex-col gap-3">
-           <GlassButton 
-            variant="glass" 
+          <GlassButton
+            variant="glass"
             className="w-full text-foreground hover:bg-muted font-bold h-14 rounded-2xl flex items-center justify-center gap-2"
             onClick={() => navigate('/resources')}
-           >
-              <Eye size={18} /> View Privacy Policy
-           </GlassButton>
-           <GlassButton 
+          >
+            <Eye size={18} /> View Privacy Policy
+          </GlassButton>
+          <GlassButton
             className="w-full bg-destructive text-white font-black uppercase tracking-widest h-14 rounded-2xl shadow-liquid border-none"
             onClick={handleLogout}
-           >
-              <LogOut size={18} className="mr-2" /> Logout
-           </GlassButton>
+          >
+            <LogOut size={18} className="mr-2" /> Logout
+          </GlassButton>
         </div>
 
         <p className="text-center text-[10px] text-muted-foreground/40 mt-10">
-          Verden v2.0.0 (Beta Build LG-003)<br/>
+          Verden v2.0.0 (Beta Build LG-003)<br />
           Designed with ❤️ for a Greener Planet
         </p>
       </div>
