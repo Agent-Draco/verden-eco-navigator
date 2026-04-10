@@ -263,16 +263,15 @@ const Map = ({
       {/* Render the 3D Vehicle via Portal into the DOM marker element */}
       {vehiclePortal && createPortal(
         <div className="w-20 h-20">
-          <Canvas camera={{ position: [2, 2, 2], fov: 35 }}>
-            <ambientLight intensity={3.0} />
-            <directionalLight position={[5, 10, 5]} intensity={1.5} />
-            <pointLight position={[-5, 5, -5]} intensity={0.5} />
+          <Canvas camera={{ position: [0, 5, 0], fov: 30 }}>
+            <ambientLight intensity={2.0} />
+            <pointLight position={[0, 5, 0]} intensity={0.5} />
             <Suspense fallback={null}>
               <Vehicle3D 
                 model={vehicle.model} 
                 color={vehicle.color} 
                 rotation={userHeading} // Aligned to user heading in map space
-                scale={1.3} 
+                scale={0.9} 
               />
             </Suspense>
           </Canvas>

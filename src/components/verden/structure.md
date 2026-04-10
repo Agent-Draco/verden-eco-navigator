@@ -18,9 +18,3 @@ This directory contains custom-built components specific to the Verden Eco-Navig
 - **SimulatedRideBooking.tsx** - Demo UI for vehicle search and booking.
 - **Vehicle3D.tsx** - High-fidelity 3D vehicle renderer using React Three Fiber.
 - **VerdenLogo.tsx** - SVG/PNG branded logo component with adaptive styling.
-- **CesiumMap.tsx** - Standalone Cesium map wrapper (simpler variant, used for embeds).
-- **CesiumViewer.tsx** - Primary navigation Cesium viewer that coordinates the sub-controllers.
-- **VehicleEntityController.ts** - Manages the Cesium vehicle entity: terrain-clamped (CLAMP_TO_GROUND), velocity-oriented, smooth interpolated GPS motion.
-- **NavigationCameraController.ts** - Navigation-mode follow camera: look-ahead offset, speed-adaptive pitch/distance, shortest-arc heading smoothing.
-- **NavigationScreen.tsx** - Full-screen navigation overlay page.
-

@@ -22,9 +22,6 @@ const Customize = lazy(() => import("@/pages/Customize"));
 const TermsAndConditions = lazy(() => import("@/pages/TermsAndConditions"));
 const PrivacyPolicy = lazy(() => import("@/pages/PrivacyPolicy"));
 const Resources = lazy(() => import("@/pages/Resources"));
-const Membership = lazy(() => import("@/pages/Membership"));
-const Settings = lazy(() => import("@/pages/Settings"));
-const NavigationScreen = lazy(() => import("@/pages/NavigationScreen"));
 
 const Root = () => {
   const { user, loading } = useAuth();
@@ -68,9 +65,6 @@ const App = () => {
               <Route path="/vehicle" element={<AuthLayout><VehicleSetup /></AuthLayout>} />
               <Route path="/customize" element={<AuthLayout><Customize /></AuthLayout>} />
               <Route path="/resources" element={<AuthLayout><Resources /></AuthLayout>} />
-              <Route path="/membership" element={<AuthLayout><Membership /></AuthLayout>} />
-              <Route path="/settings" element={<AuthLayout><Settings /></AuthLayout>} />
-              <Route path="/navigation-dev" element={<AuthLayout><NavigationScreen /></AuthLayout>} />
             </Routes>
           </AppProvider>
         </AuthProvider>

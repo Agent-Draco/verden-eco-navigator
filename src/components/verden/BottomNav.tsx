@@ -1,7 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Map, Leaf, Users, BookOpen, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useApp } from "@/contexts/AppContext";
 
 const navItems = [
   { icon: Map, label: "Map", path: "/home" },
@@ -14,9 +13,6 @@ const navItems = [
 const BottomNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isNavHidden } = useApp() || { isNavHidden: false };
-
-  if (isNavHidden || location.pathname === '/navigation' || location.pathname === '/navigation-dev') return null;
 
   return (
     <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-[100] safe-bottom md:hidden">

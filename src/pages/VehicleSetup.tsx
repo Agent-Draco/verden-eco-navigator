@@ -22,7 +22,8 @@ const VehicleSetup = () => {
   };
 
   return (
-    <div className="mobile-container overflow-y-auto p-6 pb-32">
+    <div className="relative w-full h-full p-6 pb-32 overflow-y-auto">
+      <div className="absolute top-0 right-0 w-[250px] h-[250px] rounded-full bg-verden-mint/8 blur-[100px] pointer-events-none" />
 
       <div className="w-full max-w-md mx-auto flex flex-col min-h-full">
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-muted-foreground mb-8 hover:text-foreground transition-colors group w-fit">

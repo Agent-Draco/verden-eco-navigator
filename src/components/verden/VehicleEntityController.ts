@@ -1,14 +1,3 @@
-/**
- * VehicleEntityController.ts
- *
- * Manages the Cesium entity representing the user's vehicle during navigation.
- *
- * Key updates:
- * - Unity➔Cesium alignment (+Z forward, +Y up) via nodeTransformations.
- * - SampledPositionProperty + VelocityOrientationProperty for stable 3D motion.
- * - Explicit terrain height management (avoids CLAMP_TO_GROUND instabilities).
- */
-
 import * as Cesium from 'cesium';
 import { MODEL_URLS } from './Vehicle3D';
 
@@ -16,129 +5,62 @@ export class VehicleEntityController {
   private viewer: Cesium.Viewer;
   private entity: Cesium.Entity | null = null;
   private positionProperty: Cesium.SampledPositionProperty;
-
-  /** Tracks whether this is the very first GPS sample (needs twin anchoring) */
-  private isFirstSample = true;
-
-  /** Last known compass heading in degrees (0 = North, clockwise) */
-  private lastHeadingDeg = 0;
+  private orientationProperty: Cesium.SampledProperty;
 
   constructor(viewer: Cesium.Viewer, vehicle: { model: string; color: string }) {
     this.viewer = viewer;
-
-    // ── Position property (smooth interpolation) ─────────────────────────────
     this.positionProperty = new Cesium.SampledPositionProperty();
-
-    // Hold the last/first known position instead of returning undefined
+    // Forward extrapolation prevents disappearing if GPS drops temporarily
     this.positionProperty.forwardExtrapolationType = Cesium.ExtrapolationType.HOLD;
-    this.positionProperty.backwardExtrapolationType = Cesium.ExtrapolationType.HOLD;
-
-    // Linear interpolation is most stable for real-time GPS tracks
-    this.positionProperty.setInterpolationOptions({
-      interpolationDegree: 1,
-      interpolationAlgorithm: Cesium.LinearApproximation,
-    });
-
-    // ── Vehicle entity ───────────────────────────────────────────────────────
-    const url = MODEL_URLS[vehicle.model] || MODEL_URLS.sedan;
-<<<<<<< HEAD
-=======
     
-    // Unity to Cesium Frame Alignment: +Z forward -> +X forward
-    const correctionMatrix = Cesium.Matrix3.fromRotationY(Cesium.Math.toRadians(-90));
-    const correctionQuaternion = Cesium.Quaternion.fromRotationMatrix(correctionMatrix);
+    this.orientationProperty = new Cesium.SampledProperty(Cesium.Quaternion);
+    this.orientationProperty.forwardExtrapolationType = Cesium.ExtrapolationType.HOLD;
+
+    const url = MODEL_URLS[vehicle.model] || MODEL_URLS.sedan;
 
     this.entity = this.viewer.entities.add({
       name: 'Navigation Vehicle',
       position: this.positionProperty,
-      // DYNAMIC orientation driven by velocity changes. This MUST be the only
-      // source of rotation for the entity itself.
-      orientation: new Cesium.VelocityOrientationProperty(this.positionProperty),
-
+      orientation: this.orientationProperty,
       model: {
         uri: url,
-        minimumPixelSize: 64, // Baseline visibility
-        maximumScale: 20000,
-        
-        // Use nodeTransformations for axis correction (+Z forward -> +X forward)
-        nodeTransformations: {
-          'root': {
-            rotation: new Cesium.ConstantProperty(correctionQuaternion)
-          }
-        },
-
-        // Silhouette for premium edge visibility
-        silhouetteColor: Cesium.Color.WHITE.withAlpha(0.6),
-        silhouetteSize: 1.0,
+        minimumPixelSize: 64,
+        maximumScale: 50,
       },
     });
-
-    // Set as tracked entity for automatic LOD and visibility priority baseline
-    this.viewer.trackedEntity = this.entity;
-
-    // Ensure Cesium's clock animates so interpolation runs every frame
-    this.viewer.clock.shouldAnimate = true;
-    this.viewer.clock.multiplier = 1.0;
   }
 
-  /**
-   * updateState
-   * -----------
-   * Call this every time a new GPS fix arrives.
-   *
-   * @param lng        Longitude in decimal degrees
-   * @param lat        Latitude in decimal degrees
-   * @param headingDeg Compass bearing 0–360 (0 = North, clockwise)
-   */
-  public async updateState(lng: number, lat: number, headingDeg: number): Promise<void> {
+  public updateState(lng: number, lat: number, heading: number) {
     if (!this.entity) return;
-    this.lastHeadingDeg = headingDeg;
 
-    const now = Cesium.JulianDate.now();
+    // In a real-time system, add the sample slightly in the future
+    // so the Cesium clock (which is real-time) interpolates smoothly towards it.
+    // Assuming 1s between GPS pings, a 0.5s-1s offset is stable against jitter.
+    const time = Cesium.JulianDate.addSeconds(Cesium.JulianDate.now(), 0.5, new Cesium.JulianDate());
     
-    // 1. Terrain Sampling for TRUE 3D Height (fixes VelocityOrientation stability)
+    // Attempt to use globe height for terrain
     let height = 0;
-    try {
-        const cartographic = Cesium.Cartographic.fromDegrees(lng, lat);
-        const updated = await Cesium.sampleTerrainMostDetailed(
-            this.viewer.terrainProvider, 
-            [cartographic]
-        );
-        height = updated[0].height || 0;
-    } catch (e) {
-        console.warn("Terrain sampling failed, falling back to 0");
+    if (this.viewer.scene.globe && this.viewer.terrainProvider) {
+      const cartographic = Cesium.Cartographic.fromDegrees(lng, lat);
+      height = this.viewer.scene.globe.getHeight(cartographic) || 0;
     }
-
+    
     const position = Cesium.Cartesian3.fromDegrees(lng, lat, height);
+    this.positionProperty.addSample(time, position);
 
-    if (this.isFirstSample) {
-      const pastTime = Cesium.JulianDate.addSeconds(now, -0.5, new Cesium.JulianDate());
-      const futureTime = Cesium.JulianDate.addSeconds(now, 1.0, new Cesium.JulianDate());
-      
-      this.positionProperty.addSample(pastTime, position);
-      this.positionProperty.addSample(futureTime, position);
-      this.isFirstSample = false;
-    } else {
-      const futureTime = Cesium.JulianDate.addSeconds(now, 1.0, new Cesium.JulianDate());
-      this.positionProperty.addSample(futureTime, position);
-    }
+    // Apply heading rotation using HeadingPitchRoll
+    const hpr = new Cesium.HeadingPitchRoll(Cesium.Math.toRadians(-heading + 90), 0, 0); 
+    const orientation = Cesium.Transforms.headingPitchRollQuaternion(position, hpr);
+    this.orientationProperty.addSample(time, orientation);
   }
 
-  /** Returns the Cesium entity for external reference (e.g. camera target). */
-  public getEntity(): Cesium.Entity | null {
+  public getEntity() {
     return this.entity;
   }
 
-  /** Returns the latest reported compass heading in degrees. */
-  public getLastHeadingDeg(): number {
-    return this.lastHeadingDeg;
-  }
-
-  /** Removes the entity from the viewer and frees resources. */
-  public destroy(): void {
+  public destroy() {
     if (this.entity) {
       this.viewer.entities.remove(this.entity);
-      this.entity = null;
     }
   }
 }

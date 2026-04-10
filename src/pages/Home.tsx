@@ -10,7 +10,6 @@ import verdenLogo from "@/assets/verden-logo.png";
 import { searchPlaces } from "@/services/nominatim";
 import { getRoute } from "@/services/osrm";
 import { useGeoNavigation } from "@/hooks/useGeoNavigation";
-import {SearchOverlay} from "@/components/verden/SearchOverlay";
 
 const POPULAR_SUGGESTIONS = [
   { name: "Indira Gandhi Int'l Airport", city: "Delhi", state: "Delhi", lat: 28.5562, lon: 77.1000 },
@@ -36,17 +35,11 @@ export const Home = () => {
   const [publicTransportOptions, setPublicTransportOptions] = useState({
     bus: true, shuttle: true, metro: true, cycle: true,
   });
-  const [isOverlayOpen, setIsOverlayOpen] = useState(false);
 
   const { location: userLocation, bearing: userHeading } = useGeoNavigation();
   const navigate = useNavigate();
+  const { credits, setLastGreenestRoute } = useApp();
   const inputRef = useRef<HTMLInputElement>(null);
-  const { credits, setLastGreenestRoute, setNavHidden } = useApp();
-
-  // ── Sync Navbar Visibility ────────────────────────────────────────────────
-  useEffect(() => {
-    setNavHidden(isOverlayOpen);
-  }, [isOverlayOpen, setNavHidden]);
 
   // ── Sort Popular Suggestions by Proximity ──────────────────────────────────
   const sortedPopularSuggestions = [...POPULAR_SUGGESTIONS].sort((a, b) => {
@@ -96,7 +89,6 @@ export const Home = () => {
     setQuery(place.properties.name);
     setSelectedDest(place);
     setShowSuggestions(false);
-    setIsOverlayOpen(false);
     setFastestRoute(null);
     setGreenestRoute(null);
 
@@ -165,17 +157,21 @@ export const Home = () => {
             animate={{ opacity: 1, scale: 1 }}
             className="space-y-3"
           >
-            <GlassCard 
-              variant="strong" 
-              className="flex items-center gap-4 px-6 py-4 shadow-liquid border-white/20 transition-liquid group cursor-pointer hover:bg-white/5"
-              onClick={() => {
-                setIsOverlayOpen(true);
-              }}
-            >
+            <GlassCard variant="strong" className="flex items-center gap-4 px-6 py-4 shadow-liquid border-white/20 transition-liquid group focus-within:ring-2 focus-within:ring-primary/40">
               <Search size={22} className="text-muted-foreground group-focus-within:text-primary transition-colors" />
-              <div className="flex-1 text-muted-foreground font-display font-medium text-lg h-5 leading-none overflow-hidden">
-                {query || "Where to?"}
-              </div>
+              <input
+                ref={inputRef}
+                type="text"
+                placeholder="Where to?"
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setShowSuggestions(true);
+                  setShowRoutes(false);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground font-display font-medium text-lg leading-none"
+              />
               {isSearching && (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
               )}
@@ -201,23 +197,99 @@ export const Home = () => {
                     </GlassButton>
                 </div>
             </div>
-          </motion.div>
+          </div>
 
-          {/* Search Results Overlay */}
-          <SearchOverlay 
-            isOpen={isOverlayOpen}
-            onClose={() => {
-              setIsOverlayOpen(false);
-              setNavHidden(false);
-            }}
-            query={query}
-            setQuery={setQuery}
-            suggestions={suggestions}
-            recentSearches={recentSearches}
-            popularSuggestions={sortedPopularSuggestions}
-            onSelect={handleSelect}
-            isSearching={isSearching}
-          />
+          {/* Suggestions Dropdown / Pane */}
+          <AnimatePresence>
+            {showSuggestions && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden"
+              >
+                <GlassCard variant="strong" className="p-0 overflow-hidden max-h-[50vh] overflow-y-auto shadow-2xl border-white/20 rounded-[32px] mt-2">
+                  <motion.div
+                    initial="hidden"
+                    animate="visible"
+                    variants={{
+                      visible: { transition: { staggerChildren: 0.05 } }
+                    }}
+                  >
+                  {/* Active Search Results */}
+                  {!isSearching && suggestions.length > 0 && suggestions.map((place, i) => (
+                    <motion.button
+                      key={`res-${i}`}
+                      variants={{
+                        hidden: { opacity: 0, x: -10 },
+                        visible: { opacity: 1, x: 0 }
+                      }}
+                      onClick={() => handleSelect(place)}
+                      className="w-full flex items-center gap-4 px-6 py-4 hover:bg-white/10 transition-colors border-b border-white/5 last:border-0"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <MapPin size={18} className="text-primary" />
+                      </div>
+                      <div className="text-left">
+                        <p className="text-base font-bold text-foreground">{place.properties.name}</p>
+                        <p className="text-xs text-muted-foreground line-clamp-1">{place.properties.city}{place.properties.state ? `, ${place.properties.state}` : ''}</p>
+                      </div>
+                    </motion.button>
+                  ))}
+
+                  {/* No Results Fallback */}
+                  {!isSearching && query.length >= 3 && suggestions.length === 0 && (
+                    <div className="px-4 py-8 text-center">
+                       <p className="text-sm text-muted-foreground italic">No matching results found</p>
+                    </div>
+                  )}
+
+                  {/* Default State: Recent & Popular */}
+                  {suggestions.length === 0 && !isSearching && (
+                    <div className="py-2">
+                      {recentSearches.length > 0 && (
+                        <>
+                          <p className="px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">Recent Searches</p>
+                          {recentSearches.map((place, i) => (
+                            <button
+                              key={`recent-${i}`}
+                              onClick={() => handleSelect(place)}
+                              className="w-full flex items-center gap-3 px-4 py-2 hover:bg-muted/50 transition-colors"
+                            >
+                              <Clock size={14} className="text-muted-foreground shrink-0" />
+                              <div className="text-left">
+                                <p className="text-sm text-foreground">{place.properties.name}</p>
+                                <p className="text-[10px] text-muted-foreground line-clamp-1">{place.properties.city}</p>
+                              </div>
+                            </button>
+                          ))}
+                        </>
+                      )}
+
+                      <p className="px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 mt-2">Popular Nearby</p>
+                      {sortedPopularSuggestions.map((place, i) => (
+                        <button
+                          key={`pop-${i}`}
+                          onClick={() => handleSelect({
+                            type: "Feature",
+                            geometry: { type: "Point", coordinates: [place.lon, place.lat] },
+                            properties: { name: place.name, display_name: place.name, city: place.city, state: place.state }
+                          })}
+                          className="w-full flex items-center gap-3 px-4 py-2 hover:bg-muted/50 transition-colors"
+                        >
+                          <Zap size={14} className="text-verden-electric shrink-0" />
+                          <div className="text-left">
+                            <p className="text-sm text-foreground">{place.name}</p>
+                            <p className="text-[10px] text-muted-foreground">{place.city}, {place.state}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                </GlassCard>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
         
         {/* Additional Desktop Panels */}

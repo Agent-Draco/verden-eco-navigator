@@ -9,7 +9,6 @@ export interface CesiumViewerProps {
   bearing: number;
   speedKmh: number;
   vehicle: { model: string; color: string };
-  route?: any; // OSRM route object with geometry.coordinates
 }
 
 const CesiumViewer: React.FC<CesiumViewerProps> = ({
@@ -17,14 +16,12 @@ const CesiumViewer: React.FC<CesiumViewerProps> = ({
   bearing,
   speedKmh,
   vehicle,
-  route,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<Cesium.Viewer | null>(null);
-  
+
   const vehicleCtrlRef = useRef<VehicleEntityController | null>(null);
   const cameraCtrlRef = useRef<NavigationCameraController | null>(null);
-  const routeEntityRef = useRef<Cesium.Entity | null>(null);
 
   // 1. Initialize Viewer Lifecycle
   useEffect(() => {
@@ -36,15 +33,15 @@ const CesiumViewer: React.FC<CesiumViewerProps> = ({
       // Allow default OSM imagery without requiring an Ion token
       Cesium.Ion.defaultAccessToken = '';
       const imageryProvider = new Cesium.OpenStreetMapImageryProvider({
-          url : 'https://a.tile.openstreetmap.org/'
+        url: 'https://a.tile.openstreetmap.org/'
       });
 
       // Load Terrain Provider if requested
       let terrainProvider;
       try {
-          terrainProvider = await Cesium.createWorldTerrainAsync();
+        terrainProvider = await Cesium.createWorldTerrainAsync();
       } catch (e) {
-          console.warn("Failed to load Cesium World Terrain:", e);
+        console.warn("Failed to load Cesium World Terrain:", e);
       }
 
       if (!_isMounted) return;
@@ -72,10 +69,10 @@ const CesiumViewer: React.FC<CesiumViewerProps> = ({
       // 2. Initialize Sub-Controllers
       vehicleCtrlRef.current = new VehicleEntityController(viewerRef.current, vehicle);
       cameraCtrlRef.current = new NavigationCameraController(viewerRef.current, bearing);
-      
+
       const entity = vehicleCtrlRef.current.getEntity();
       if (entity) {
-          cameraCtrlRef.current.setTarget(entity);
+        cameraCtrlRef.current.setTarget(entity);
       }
     };
 
@@ -101,68 +98,12 @@ const CesiumViewer: React.FC<CesiumViewerProps> = ({
       // Pass coordinates to vehicle entity handler for interpolation
       vehicleCtrlRef.current.updateState(userLocation[1], userLocation[0], bearing);
     }
-    
+
     if (cameraCtrlRef.current) {
       // Pass speed and bearing to custom smoothing camera logic
       cameraCtrlRef.current.setParams(bearing, speedKmh);
     }
   }, [userLocation, bearing, speedKmh]);
-
-  // 4. Handle Route Rendering (Terrain Aligned 3D Polyline)
-  useEffect(() => {
-    if (!viewerRef.current || !route?.geometry?.coordinates) return;
-
-    const renderRoute = async () => {
-      const viewer = viewerRef.current;
-      if (!viewer) return;
-
-      // 1. Clear existing route
-      if (routeEntityRef.current) {
-        viewer.entities.remove(routeEntityRef.current);
-        routeEntityRef.current = null;
-      }
-
-      // 2. Flatten and convert to Cartographic for terrain sampling
-      const rawCoords = route.geometry.coordinates; // [[lon, lat], ...]
-      const cartographics = rawCoords.map((c: [number, number]) => 
-        Cesium.Cartographic.fromDegrees(c[0], c[1])
-      );
-
-      // 3. Sample Terrain for Manual 3D Alignment (avoids depthFailMaterial bugs)
-      let sampled;
-      try {
-        sampled = await Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, cartographics);
-      } catch (e) {
-        console.warn("Route terrain sampling failed:", e);
-        sampled = cartographics;
-      }
-
-      const positions = sampled.map((c: Cesium.Cartographic) => 
-        Cesium.Cartesian3.fromRadians(c.longitude, c.latitude, (c.height || 0) + 0.5) // Offset 50cm above ground (prevents z-fighting)
-      );
-
-      // 4. Add Premium 3D Route Entity
-      routeEntityRef.current = viewer.entities.add({
-        name: 'Navigation Route',
-        polyline: {
-          positions,
-          width: 8,
-          material: new Cesium.PolylineGlowMaterialProperty({
-            glowPower: 0.2,
-            color: Cesium.Color.CYAN,
-          }),
-          // Use a consistent material type for depth-fail to avoid shader conflicts
-          depthFailMaterial: new Cesium.PolylineGlowMaterialProperty({
-            glowPower: 0.1, // Less intense glow for visibility through terrain
-            color: Cesium.Color.CYAN.withAlpha(0.5),
-            taperPower: 1, // Optional: No tapering for the failed part
-          }),
-        },
-      });
-    };
-
-    renderRoute();
-  }, [route]);
 
   return <div ref={containerRef} className="w-full h-full" />;
 };

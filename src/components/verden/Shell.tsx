@@ -10,8 +10,8 @@ const Shell = ({ children }: ShellProps) => {
   return (
     <div className="flex w-screen h-screen bg-background overflow-hidden">
       <SidebarNav />
-      <div className="flex-1 relative flex flex-col min-h-0">
-        <main className="flex-1 overflow-y-auto">
+      <div className="flex-1 relative overflow-hidden flex flex-col">
+        <main className="flex-1 relative overflow-hidden">
           {children}
         </main>
       </div>
