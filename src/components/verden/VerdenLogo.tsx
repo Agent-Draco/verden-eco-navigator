@@ -5,7 +5,7 @@ interface VerdenLogoProps {
   className?: string;
 }
 
-const VerdenLogo = ({ size = 40, className = "" }: VerdenLogoProps) => (
+export const VerdenLogo = ({ size = 40, className = "" }: VerdenLogoProps) => (
   <motion.svg
     width={size}
     height={size}
@@ -51,5 +51,3 @@ const VerdenLogo = ({ size = 40, className = "" }: VerdenLogoProps) => (
     </defs>
   </motion.svg>
 );
-
-export default VerdenLogo;

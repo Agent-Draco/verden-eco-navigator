@@ -41,35 +41,32 @@ export class VehicleEntityController {
 
     // ── Vehicle entity ───────────────────────────────────────────────────────
     const url = MODEL_URLS[vehicle.model] || MODEL_URLS.sedan;
-    
-    // Correction for Blender/Unity's coordinate system (Y-up, Z-forward)
-    // to Cesium's (Z-up, X-forward)
-    const heading = Cesium.Math.toRadians(90);
-    const pitch = 0;
-    const roll = Cesium.Math.toRadians(90);
-    const hpr = new Cesium.HeadingPitchRoll(heading, pitch, roll);
-    const correctionQuaternion = Cesium.Transforms.headingPitchRollQuaternion(
-      Cesium.Cartesian3.fromDegrees(0, 0, 0), // Center of the model
-      hpr
-    );
-
-    // Create a TranslationRotationScale instance and set its rotation property.
-    const rootNodeTransform = new Cesium.TranslationRotationScale();
-    rootNodeTransform.rotation = new Cesium.ConstantProperty(correctionQuaternion);
 
     this.entity = this.viewer.entities.add({
       name: 'Navigation Vehicle',
       position: this.positionProperty,
+      // DYNAMIC orientation driven by velocity changes. This MUST be the only
+      // source of rotation for the entity itself.
       orientation: new Cesium.VelocityOrientationProperty(this.positionProperty),
 
       model: {
         uri: url,
         minimumPixelSize: 64, // Baseline visibility
         maximumScale: 20000,
-        
-        // Use the created TranslationRotationScale instance for the root node.
+
+        // STATIC correction for the model's intrinsic orientation.
+        // This rotates the model within its own reference frame to align it
+        // with Cesium's East-North-Up (ENU) convention (X-forward).
         nodeTransformations: {
-          root: rootNodeTransform
+          root: {
+            rotation: Cesium.Quaternion.fromHeadingPitchRoll(
+              new Cesium.HeadingPitchRoll(
+                Cesium.Math.toRadians(90), // Align model's original Y-forward to Cesium's X-forward
+                0,
+                Cesium.Math.toRadians(90)  // Align model's original Z-up to Cesium's Y-up
+              )
+            ),
+          },
         },
 
         // Silhouette for premium edge visibility

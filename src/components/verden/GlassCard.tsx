@@ -6,7 +6,7 @@ interface GlassCardProps extends HTMLMotionProps<"div"> {
   children: React.ReactNode;
 }
 
-const GlassCard = ({ variant = "default", className, children, ...props }: GlassCardProps) => {
+export const GlassCard = ({ variant = "default", className, children, ...props }: GlassCardProps) => {
   const variants = {
     default: "glass",
     strong: "glass-strong",
@@ -29,5 +29,3 @@ const GlassCard = ({ variant = "default", className, children, ...props }: Glass
     </motion.div>
   );
 };
-
-export default GlassCard;

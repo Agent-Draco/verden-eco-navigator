@@ -1,6 +1,7 @@
 # AI Assistant Instructions
 
 This document outlines the rules and guidelines for the AI assistant to follow during project development. Adherence to these instructions is critical for maintaining code quality, project structure, and workflow consistency.
+**Never, ever publish to Github yourself.**
 
 ---
 

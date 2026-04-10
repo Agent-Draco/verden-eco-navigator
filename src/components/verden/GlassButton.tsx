@@ -11,7 +11,7 @@ interface GlassButtonProps extends HTMLMotionProps<"button"> {
   onSuccessComplete?: () => void;
 }
 
-const GlassButton = ({ 
+export const GlassButton = ({ 
   variant = "primary", 
   size = "md", 
   className, 
@@ -99,5 +99,3 @@ const GlassButton = ({
     </motion.button>
   );
 };
-
-export default GlassButton;

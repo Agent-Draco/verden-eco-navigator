@@ -2,6 +2,8 @@
 
 **Verden Eco-Navigator** is a next-generation, 3D-enabled navigation application designed for eco-conscious drivers. By providing real-time, high-fidelity visualization of routes and vehicle dynamics, it aims to enhance driver awareness and promote efficient driving habits.
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/783602ec-aa31-4a00-8976-04e5c1a7ead3/deploy-status)](https://app.netlify.com/projects/verden2/deploys)
+
 ---
 
 ## ✨ Features

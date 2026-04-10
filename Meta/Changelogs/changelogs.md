@@ -32,3 +32,4 @@
 - [DOC-001] (2026-04-09): Project README Overhaul - Replaced placeholder with a comprehensive, professionally formatted `README.md`.
 
 ## Version 2.0.3 (Exhibition Page)
+- [FIX-006] (2026-04-09): Corrected vehicle model orientation and rendering by removing manual orientation overrides and applying a static correction at the model level.
