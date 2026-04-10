@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Wallet as WalletIcon, TrendingUp, TrendingDown, Plus, ArrowRightLeft } from "lucide-react";
-import GlassCard from "@/components/verden/GlassCard";
-import GlassButton from "@/components/verden/GlassButton";
+import { GlassCard } from "@/components/verden/GlassCard";
+import { GlassButton } from "@/components/verden/GlassButton";
 import { useApp } from "@/contexts/AppContext";
 
 const Wallet = () => {

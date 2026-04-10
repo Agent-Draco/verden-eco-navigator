@@ -11,7 +11,7 @@ interface GlassButtonProps extends HTMLMotionProps<"button"> {
   onSuccessComplete?: () => void;
 }
 
-const GlassButton = ({ 
+export const GlassButton = ({ 
   variant = "primary", 
   size = "md", 
   className, 
@@ -34,7 +34,7 @@ const GlassButton = ({
     }
   }, [showSuccess, internalStatus, onSuccessComplete]);
 
-  const base = "font-display font-bold rounded-[24px] transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-95 relative overflow-hidden flex items-center justify-center";
+  const base = "font-display font-bold rounded-[24px] transition-all duration-500 ease-custom-ease active:scale-95 relative overflow-hidden flex items-center justify-center";
   
   const variants = {
     primary: "bg-gradient-green text-primary-foreground shadow-lg hover:shadow-primary/20",
@@ -99,5 +99,3 @@ const GlassButton = ({
     </motion.button>
   );
 };
-
-export default GlassButton;

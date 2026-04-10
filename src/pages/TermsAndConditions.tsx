@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import GlassCard from "@/components/verden/GlassCard";
+import { GlassCard } from "@/components/verden/GlassCard";
 
 const TermsAndConditions = () => {
   const navigate = useNavigate();

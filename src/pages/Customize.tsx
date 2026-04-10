@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Palette, User, Lock, Sparkles, Car, Bike, Zap, Flame, Droplets, Leaf, Shield, HeartPulse } from "lucide-react";
-import GlassCard from "@/components/verden/GlassCard";
-import GlassButton from "@/components/verden/GlassButton";
+import { GlassCard } from "@/components/verden/GlassCard";
+import { GlassButton } from "@/components/verden/GlassButton";
 import { useApp } from "@/contexts/AppContext";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/theme-provider";

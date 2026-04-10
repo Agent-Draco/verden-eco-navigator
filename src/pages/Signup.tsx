@@ -3,8 +3,8 @@ import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Mail, Lock, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import GlassCard from "@/components/verden/GlassCard";
-import GlassButton from "@/components/verden/GlassButton";
+import { GlassCard } from "@/components/verden/GlassCard";
+import { GlassButton } from "@/components/verden/GlassButton";
 import verdenLogo from "@/assets/verden-logo.png";
 
 const Signup = () => {

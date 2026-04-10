@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight, Leaf, Route, Award } from "lucide-react";
-import GlassButton from "@/components/verden/GlassButton";
+import { GlassButton } from "@/components/verden/GlassButton";
 import MapBackground from "@/components/verden/MapBackground";
 import verdenLogo from "@/assets/verden-logo.png";
 

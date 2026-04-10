@@ -2,8 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ExternalLink, BookOpen, Globe, Leaf, Zap, Shield, Car } from 'lucide-react';
-import GlassCard from '@/components/verden/GlassCard';
-import GlassButton from '@/components/verden/GlassButton';
+import { GlassCard } from '@/components/verden/GlassCard';
+import { GlassButton } from '@/components/verden/GlassButton';
 
 const RESOURCE_LINKS = [
   {

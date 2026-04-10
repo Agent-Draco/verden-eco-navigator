@@ -2,15 +2,15 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Zap, Leaf, Clock, Navigation2, MapPin, Car, Bike, Bus } from "lucide-react";
-import GlassCard from "@/components/verden/GlassCard";
-import GlassButton from "@/components/verden/GlassButton";
+import {GlassCard} from "@/components/verden/GlassCard";
+import {GlassButton} from "@/components/verden/GlassButton";
 import Map from "@/components/verden/Map";
 import { useApp } from "@/contexts/AppContext";
 import verdenLogo from "@/assets/verden-logo.png";
 import { searchPlaces } from "@/services/nominatim";
 import { getRoute } from "@/services/osrm";
 import { useGeoNavigation } from "@/hooks/useGeoNavigation";
-import SearchOverlay from "@/components/verden/SearchOverlay";
+import {SearchOverlay} from "@/components/verden/SearchOverlay";
 
 const POPULAR_SUGGESTIONS = [
   { name: "Indira Gandhi Int'l Airport", city: "Delhi", state: "Delhi", lat: 28.5562, lon: 77.1000 },
@@ -20,7 +20,7 @@ const POPULAR_SUGGESTIONS = [
   { name: "Phoenix Marketcity", city: "Pune", state: "Maharashtra", lat: 18.5622, lon: 73.9167 },
 ];
 
-const Home = () => {
+export const Home = () => {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -46,7 +46,7 @@ const Home = () => {
   // ── Sync Navbar Visibility ────────────────────────────────────────────────
   useEffect(() => {
     setNavHidden(isOverlayOpen);
-  }, [isOverlayOpen, setNavHidden]);
+  }, [isOverlayOpen]);
 
   // ── Sort Popular Suggestions by Proximity ──────────────────────────────────
   const sortedPopularSuggestions = [...POPULAR_SUGGESTIONS].sort((a, b) => {
@@ -311,5 +311,3 @@ const Home = () => {
     </div>
   );
 };
-
-export default Home;

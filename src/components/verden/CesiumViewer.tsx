@@ -149,11 +149,15 @@ const CesiumViewer: React.FC<CesiumViewerProps> = ({
           width: 8,
           material: new Cesium.PolylineGlowMaterialProperty({
             glowPower: 0.2,
-            color: Cesium.Color.CYAN
+            color: Cesium.Color.CYAN,
           }),
-          // X-ray visibility: Use basic Color for better compatibility in depthFail slot
-          depthFailMaterial: Cesium.Color.CYAN.withAlpha(0.3)
-        }
+          // Use a consistent material type for depth-fail to avoid shader conflicts
+          depthFailMaterial: new Cesium.PolylineGlowMaterialProperty({
+            glowPower: 0.1, // Less intense glow for visibility through terrain
+            color: Cesium.Color.CYAN.withAlpha(0.5),
+            taperPower: 1, // Optional: No tapering for the failed part
+          }),
+        },
       });
     };
 
