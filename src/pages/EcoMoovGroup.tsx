@@ -133,7 +133,7 @@ const EcoMoovGroup = () => {
       <div className="flex-1 flex flex-col overflow-hidden px-4 py-6 md:px-8">
         {/* Header */}
         <div className="flex items-center mb-6 shrink-0">
-          <GlassButton size="icon" variant="glass" className="mr-4 rounded-xl shadow-sm" onClick={() => navigate("/ecomoov")}>
+          <GlassButton size="icon" variant="glass" className="mr-4 rounded-xl shadow-sm" aria-label="Go back" onClick={() => navigate("/ecomoov")}>
             <ArrowLeft size={20} />
           </GlassButton>
           <div>
@@ -278,6 +278,7 @@ const EcoMoovGroup = () => {
                 </GlassCard>
                 <GlassButton 
                     className="rounded-2xl w-12 h-12 flex items-center justify-center shadow-lg active:scale-95 transition-transform" 
+                    aria-label="Send message"
                     onClick={handleSendMessage} 
                     disabled={!newMessage.trim()}
                 >
