@@ -75,8 +75,8 @@ const EcoMoov = () => {
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-display font-semibold text-foreground">{month} {year}</h3>
           <div className="flex gap-1">
-            <GlassButton size="icon" variant="glass" onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)))}><ChevronLeft size={16}/></GlassButton>
-            <GlassButton size="icon" variant="glass" onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)))}><ChevronRight size={16}/></GlassButton>
+            <GlassButton aria-label="Previous month" size="icon" variant="glass" onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)))}><ChevronLeft size={16}/></GlassButton>
+            <GlassButton aria-label="Next month" size="icon" variant="glass" onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)))}><ChevronRight size={16}/></GlassButton>
           </div>
         </div>
         <div className="grid grid-cols-7 text-center text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
