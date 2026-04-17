@@ -133,7 +133,7 @@ const EcoMoovGroup = () => {
       <div className="flex-1 flex flex-col overflow-hidden px-4 py-6 md:px-8">
         {/* Header */}
         <div className="flex items-center mb-6 shrink-0">
-          <GlassButton size="icon" variant="glass" className="mr-4 rounded-xl shadow-sm" onClick={() => navigate("/ecomoov")}>
+          <GlassButton aria-label="Go back" size="icon" variant="glass" className="mr-4 rounded-xl shadow-sm" onClick={() => navigate("/ecomoov")}>
             <ArrowLeft size={20} />
           </GlassButton>
           <div>
