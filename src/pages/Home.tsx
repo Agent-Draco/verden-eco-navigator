@@ -186,10 +186,10 @@ export const Home = () => {
             {/* Transport & Mode Controls */}
             <div className="flex flex-col gap-3">
                 <div className="flex justify-around bg-white/5 backdrop-blur-xl rounded-[24px] p-1 gap-1 border border-white/10 shadow-liquid">
-                    <GlassButton onClick={() => setTransportMode('car')} variant={transportMode === 'car' ? 'default' : 'glass'} size="icon" className="flex-1 h-12 text-foreground rounded-[20px]"><Car size={20}/></GlassButton>
-                    <GlassButton onClick={() => setTransportMode('bike')} variant={transportMode === 'bike' ? 'default' : 'glass'} size="icon" className="flex-1 h-12 text-xl rounded-[20px]">🏍️</GlassButton>
-                    <GlassButton onClick={() => setTransportMode('cycle')} variant={transportMode === 'cycle' ? 'default' : 'glass'} size="icon" className="flex-1 h-12 text-foreground rounded-[20px]"><Bike size={20}/></GlassButton>
-                    <GlassButton onClick={() => setTransportMode('public')} variant={transportMode === 'public' ? 'default' : 'glass'} size="icon" className="flex-1 h-12 text-foreground rounded-[20px]"><Bus size={20}/></GlassButton>
+                    <GlassButton aria-label="Car mode" onClick={() => setTransportMode('car')} variant={transportMode === 'car' ? 'default' : 'glass'} size="icon" className="flex-1 h-12 text-foreground rounded-[20px]"><Car size={20}/></GlassButton>
+                    <GlassButton aria-label="Bike mode" onClick={() => setTransportMode('bike')} variant={transportMode === 'bike' ? 'default' : 'glass'} size="icon" className="flex-1 h-12 text-xl rounded-[20px]">🏍️</GlassButton>
+                    <GlassButton aria-label="Cycle mode" onClick={() => setTransportMode('cycle')} variant={transportMode === 'cycle' ? 'default' : 'glass'} size="icon" className="flex-1 h-12 text-foreground rounded-[20px]"><Bike size={20}/></GlassButton>
+                    <GlassButton aria-label="Public transport mode" onClick={() => setTransportMode('public')} variant={transportMode === 'public' ? 'default' : 'glass'} size="icon" className="flex-1 h-12 text-foreground rounded-[20px]"><Bus size={20}/></GlassButton>
                 </div>
                 
                 <div className="flex gap-2">
