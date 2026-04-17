@@ -1,0 +1,4 @@
+## 2024-04-16 - Ensure custom animated components inherit standard states
+
+**Learning:** Custom components built with libraries like `framer-motion` (e.g., `motion.button`) do not automatically receive the standard accessibility styling (focus states, disabled states) that UI libraries like `shadcn` provide for their base components. This can lead to accessibility regressions where buttons lack visible focus rings or don't visually indicate a disabled state.
+**Action:** Always ensure that custom interactive components explicitly include standard interaction state classes (e.g., `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50`) to maintain a consistent and accessible user experience across the application.
