@@ -88,8 +88,17 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({
             {vehicles.map((v) => (
               <div 
                 key={v.id}
-                className={React.useMemo(() => `flex-shrink-0 w-48 snap-center transition-all ${selectedModel === v.id ? 'scale-110' : 'scale-90 opacity-40'}`, [selectedModel, v.id])}
+                role="button"
+                tabIndex={0}
+                aria-label={`Select ${v.label} vehicle model`}
+                className={`flex-shrink-0 w-48 snap-center transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-xl ${selectedModel === v.id ? 'scale-110' : 'scale-90 opacity-40'}`}
                 onClick={() => setSelectedModel(v.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setSelectedModel(v.id);
+                  }
+                }}
               >
                 <div className="h-32 mb-3">
                   <Canvas camera={{ position: [2, 2, 2], fov: 40 }}>
