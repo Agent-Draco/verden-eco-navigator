@@ -1,0 +1,5 @@
+## 2024-05-18 - Keyboard Focus and Disabled States for Custom Components
+
+**Learning:** When building highly custom interactive components like `GlassButton` with Framer Motion, native accessibility states like `:focus-visible` and `:disabled` are easily overlooked. Also, complex inline custom easing classes (e.g. `ease-[cubic-bezier(...)]`) can sometimes cause issues in Vite styling pipelines when mixed with other transitions.
+
+**Action:** Consistently apply `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background` to all custom buttons to ensure robust keyboard navigation support, and apply `disabled:opacity-50 disabled:pointer-events-none` for disabled states. Use standardized css classes (like `transition-liquid`) instead of hardcoded bezier curves in component tailwind classes.
