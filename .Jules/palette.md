@@ -1,0 +1,4 @@
+## 2024-05-18 - Keyboard Accessibility and Tailwind Transitions
+
+**Learning:** Custom interactive components need explicit `focus-visible` pseudo-class definitions in Tailwind CSS (e.g., `focus-visible:ring-primary focus-visible:ring-offset-background`) to maintain keyboard accessibility standards, as default browser focus styles are often removed by CSS resets. Additionally, using arbitrary complex timing functions directly in Tailwind classes (like `ease-[cubic-bezier(...)]`) can cause Vite/esbuild CSS compilation ambiguous matches and failures.
+**Action:** Always define `focus-visible` styles for interactive elements to ensure clear keyboard navigation. Use predefined CSS classes (e.g., `.transition-liquid`) instead of arbitrary complex inline transition classes to avoid compilation issues and maintain consistency.
