@@ -76,7 +76,7 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({
             <h2 className="text-xl font-display font-black text-foreground">Choose driving avatar</h2>
             <button 
               onClick={onClose}
-              className="p-2 hover:bg-muted rounded-full transition-colors"
+              className="p-2 hover:bg-muted rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
               aria-label="Close selection"
             >
               <X size={24} />
@@ -88,8 +88,21 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({
             {vehicles.map((v) => (
               <div 
                 key={v.id}
-                className={React.useMemo(() => `flex-shrink-0 w-48 snap-center transition-all ${selectedModel === v.id ? 'scale-110' : 'scale-90 opacity-40'}`, [selectedModel, v.id])}
+                role="button"
+                tabIndex={0}
+                aria-label={`Select ${v.label} vehicle`}
+                aria-pressed={selectedModel === v.id}
+                className={React.useMemo(() => cn(
+                  "flex-shrink-0 w-48 snap-center transition-all cursor-pointer rounded-xl focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none",
+                  selectedModel === v.id ? "scale-110" : "scale-90 opacity-40"
+                ), [selectedModel, v.id])}
                 onClick={() => setSelectedModel(v.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setSelectedModel(v.id);
+                  }
+                }}
               >
                 <div className="h-32 mb-3">
                   <Canvas camera={{ position: [2, 2, 2], fov: 40 }}>
@@ -118,7 +131,7 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({
                 <button
                   key={c.name}
                   className={cn(
-                    "w-10 h-10 rounded-full border-4 transition-all shadow-lg flex items-center justify-center",
+                    "w-10 h-10 rounded-full border-4 transition-all shadow-lg flex items-center justify-center focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none",
                     selectedColor === c.value ? "scale-110 border-primary" : "border-transparent",
                     c.name === 'Blue' && "bg-[#3b82f6]",
                     c.name === 'Red' && "bg-[#ef4444]",
@@ -129,6 +142,7 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({
                   )}
                   onClick={() => setSelectedColor(c.value)}
                   aria-label={`Select ${c.name} color`}
+                  aria-pressed={selectedColor === c.value}
                 >
                   {selectedColor === c.value && <Check size={18} className={c.name === 'White' ? 'text-black' : 'text-white'} />}
                 </button>
