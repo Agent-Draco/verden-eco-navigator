@@ -1,0 +1,4 @@
+## 2024-05-03 - Accessible custom buttons require explicit focus/disabled styles
+
+**Learning:** Custom components like `<motion.button>` that apply extensive CSS and abstract interaction base classes often inadvertently lack essential keyboard focus and disabled state indications. Without explicitly adding Tailwind's `focus-visible` pseudo-class (like `focus-visible:ring-primary focus-visible:ring-offset-2`) and `disabled` states (`disabled:opacity-50 disabled:pointer-events-none`), these buttons fail baseline accessibility expectations despite inheriting native HTML behavior.
+**Action:** When implementing new wrapper buttons or interactive standard components across frontend repositories, always ensure explicit `focus-visible` and `disabled` visual styling are included in their baseline configuration to maintain keyboard accessibility and state transparency.
