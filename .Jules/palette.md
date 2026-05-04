@@ -1,0 +1,4 @@
+
+## 2026-05-04 - Focus-Visible and Disabled States on Framer Motion Components
+**Learning:** Custom interactive components like those wrapped in Framer Motion (`<motion.button>`) must explicitly manage native CSS focus states via `focus-visible` to maintain keyboard accessibility, and inherited `disabled` attributes must be accounted for in animation states (e.g., preventing scaling effects) to ensure accessibility feedback matches standard browser behavior.
+**Action:** When creating or modifying generic animated interaction components, always add `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50 disabled:pointer-events-none` directly to their base class string and adjust interaction animations based on their `disabled` status.
