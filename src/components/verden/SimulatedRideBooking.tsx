@@ -55,7 +55,15 @@ const SimulatedRideBooking = ({ distance, onComplete }) => {
                         <GlassCard 
                             key={opt.type} 
                             onClick={() => setSelectedOption(opt)} 
-                            className={`p-3 flex items-center justify-between cursor-pointer border-2 ${selectedOption.type === opt.type ? 'border-primary/50' : 'border-transparent'}`}>
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    setSelectedOption(opt);
+                                }
+                            }}
+                            className={`p-3 flex items-center justify-between cursor-pointer border-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background ${selectedOption.type === opt.type ? 'border-primary/50' : 'border-transparent'}`}>
                             <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
                                     {opt.icon}

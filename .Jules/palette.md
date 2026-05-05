@@ -1,0 +1,3 @@
+## 2024-05-05 - Ensuring Keyboard Accessibility on Div-based Elements
+**Learning:** Custom interactive elements built with `div` tags (like `GlassCard` used as a selectable option) are inherently inaccessible to keyboard users unless explicitly enhanced.
+**Action:** Always ensure custom `div`-based buttons or selectable cards are equipped with `role="button"`, `tabIndex={0}`, an `onKeyDown` handler for both 'Enter' and 'Space' keys (including `e.preventDefault()` to stop page scroll on Space), and utilize `focus-visible` classes to render clear visual focus states without compromising mouse click aesthetics.
