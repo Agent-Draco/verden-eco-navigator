@@ -38,14 +38,13 @@ export const Home = () => {
 
   const { location: userLocation, bearing: userHeading } = useGeoNavigation();
   const navigate = useNavigate();
-  const { credits, setLastGreenestRoute } = useApp();
-  const inputRef = useRef<HTMLInputElement>(null);
   const { credits, setLastGreenestRoute, setNavHidden } = useApp();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // ── Sync Navbar Visibility ────────────────────────────────────────────────
   useEffect(() => {
-    setNavHidden(isOverlayOpen);
-  }, [isOverlayOpen, setNavHidden]);
+    setNavHidden(showSuggestions || showRoutes);
+  }, [showSuggestions, showRoutes, setNavHidden]);
 
   // ── Sort Popular Suggestions by Proximity ──────────────────────────────────
   const sortedPopularSuggestions = [...POPULAR_SUGGESTIONS].sort((a, b) => {
@@ -158,11 +157,7 @@ export const Home = () => {
           </motion.div>
 
           {/* Search Input Pane */}
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="space-y-3"
-          >
+        <div className="space-y-3">
             <GlassCard variant="strong" className="flex items-center gap-4 px-6 py-4 shadow-liquid border-white/20 transition-liquid group focus-within:ring-2 focus-within:ring-primary/40">
               <Search size={22} className="text-muted-foreground group-focus-within:text-primary transition-colors" />
               <input
@@ -203,7 +198,6 @@ export const Home = () => {
                     </GlassButton>
                 </div>
             </div>
-          </div>
 
           {/* Suggestions Dropdown / Pane */}
           <AnimatePresence>
