@@ -38,14 +38,13 @@ export const Home = () => {
 
   const { location: userLocation, bearing: userHeading } = useGeoNavigation();
   const navigate = useNavigate();
-  const { credits, setLastGreenestRoute } = useApp();
-  const inputRef = useRef<HTMLInputElement>(null);
   const { credits, setLastGreenestRoute, setNavHidden } = useApp();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // ── Sync Navbar Visibility ────────────────────────────────────────────────
   useEffect(() => {
-    setNavHidden(isOverlayOpen);
-  }, [isOverlayOpen, setNavHidden]);
+    setNavHidden(showSuggestions || showRoutes);
+  }, [showSuggestions, showRoutes, setNavHidden]);
 
   // ── Sort Popular Suggestions by Proximity ──────────────────────────────────
   const sortedPopularSuggestions = [...POPULAR_SUGGESTIONS].sort((a, b) => {
@@ -158,7 +157,7 @@ export const Home = () => {
           </motion.div>
 
           {/* Search Input Pane */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="space-y-3"
@@ -203,7 +202,7 @@ export const Home = () => {
                     </GlassButton>
                 </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Suggestions Dropdown / Pane */}
           <AnimatePresence>
@@ -223,7 +222,7 @@ export const Home = () => {
                     }}
                   >
                   {/* Active Search Results */}
-                  {!isSearching && suggestions.length > 0 && suggestions.map((place, i) => (
+                  {!isSearching && suggestions.length > 0 && suggestions.map((place: Record<string, any>, i) => (
                     <motion.button
                       key={`res-${i}`}
                       variants={{
@@ -256,7 +255,7 @@ export const Home = () => {
                       {recentSearches.length > 0 && (
                         <>
                           <p className="px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">Recent Searches</p>
-                          {recentSearches.map((place, i) => (
+                          {recentSearches.map((place: Record<string, unknown>, i) => (
                             <button
                               key={`recent-${i}`}
                               onClick={() => handleSelect(place)}
@@ -291,6 +290,7 @@ export const Home = () => {
                         </button>
                       ))}
                     </div>
+                  )}
                   </motion.div>
                 </GlassCard>
               </motion.div>
