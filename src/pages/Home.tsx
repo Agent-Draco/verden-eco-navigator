@@ -295,7 +295,7 @@ export const Home = () => {
               </motion.div>
             )}
           </AnimatePresence>
-        </motion.div>
+        </div>
         
         {/* Additional Desktop Panels */}
         {transportMode === 'public' && (
