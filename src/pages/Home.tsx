@@ -38,8 +38,10 @@ export const Home = () => {
 
   const { location: userLocation, bearing: userHeading } = useGeoNavigation();
   const navigate = useNavigate();
-  const { credits, setLastGreenestRoute, setNavHidden } = useApp();
+  const { credits, setLastGreenestRoute } = useApp();
   const inputRef = useRef<HTMLInputElement>(null);
+  const { credits, setLastGreenestRoute, setNavHidden } = useApp();
+
   // ── Sync Navbar Visibility ────────────────────────────────────────────────
   useEffect(() => {
     setNavHidden(isOverlayOpen);
@@ -201,7 +203,7 @@ export const Home = () => {
                     </GlassButton>
                 </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Suggestions Dropdown / Pane */}
           <AnimatePresence>
