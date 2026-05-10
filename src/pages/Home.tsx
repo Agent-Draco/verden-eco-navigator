@@ -38,7 +38,6 @@ export const Home = () => {
 
   const { location: userLocation, bearing: userHeading } = useGeoNavigation();
   const navigate = useNavigate();
-  const { credits, setLastGreenestRoute } = useApp();
   const inputRef = useRef<HTMLInputElement>(null);
   const { credits, setLastGreenestRoute, setNavHidden } = useApp();
 
@@ -203,7 +202,7 @@ export const Home = () => {
                     </GlassButton>
                 </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Suggestions Dropdown / Pane */}
           <AnimatePresence>
@@ -224,14 +223,14 @@ export const Home = () => {
                   >
                   {/* Active Search Results */}
                   {!isSearching && suggestions.length > 0 && suggestions.map((place, i) => (
-                    <motion.button
+                    <motion.div
                       key={`res-${i}`}
                       variants={{
                         hidden: { opacity: 0, x: -10 },
                         visible: { opacity: 1, x: 0 }
                       }}
                       onClick={() => handleSelect(place)}
-                      className="w-full flex items-center gap-4 px-6 py-4 hover:bg-white/10 transition-colors border-b border-white/5 last:border-0"
+                      className="w-full flex items-center gap-4 px-6 py-4 hover:bg-white/10 transition-colors border-b border-white/5 last:border-0 cursor-pointer"
                     >
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                         <MapPin size={18} className="text-primary" />
@@ -240,7 +239,7 @@ export const Home = () => {
                         <p className="text-base font-bold text-foreground">{place.properties.name}</p>
                         <p className="text-xs text-muted-foreground line-clamp-1">{place.properties.city}{place.properties.state ? `, ${place.properties.state}` : ''}</p>
                       </div>
-                    </motion.button>
+                    </motion.div>
                   ))}
 
                   {/* No Results Fallback */}
@@ -291,6 +290,7 @@ export const Home = () => {
                         </button>
                       ))}
                     </div>
+                  )}
                   </motion.div>
                 </GlassCard>
               </motion.div>
