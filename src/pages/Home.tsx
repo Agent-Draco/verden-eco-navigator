@@ -38,9 +38,8 @@ export const Home = () => {
 
   const { location: userLocation, bearing: userHeading } = useGeoNavigation();
   const navigate = useNavigate();
-  const { credits, setLastGreenestRoute } = useApp();
   const inputRef = useRef<HTMLInputElement>(null);
-  const { credits, setLastGreenestRoute, setNavHidden } = useApp();
+  const { credits, setLastGreenestRoute, setNavHidden, isOverlayOpen } = useApp();
 
   // ── Sync Navbar Visibility ────────────────────────────────────────────────
   useEffect(() => {
