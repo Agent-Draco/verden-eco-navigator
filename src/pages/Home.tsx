@@ -38,8 +38,8 @@ export const Home = () => {
 
   const { location: userLocation, bearing: userHeading } = useGeoNavigation();
   const navigate = useNavigate();
-  const { credits, setLastGreenestRoute } = useApp();
   const inputRef = useRef<HTMLInputElement>(null);
+  const { credits, setLastGreenestRoute, setNavHidden } = useApp();
 
   // ── Sync Navbar Visibility ────────────────────────────────────────────────
   useEffect(() => {
@@ -290,6 +290,7 @@ export const Home = () => {
                         </button>
                       ))}
                     </div>
+                  )}
                   </motion.div>
                 </GlassCard>
               </motion.div>
