@@ -38,7 +38,6 @@ export const Home = () => {
 
   const { location: userLocation, bearing: userHeading } = useGeoNavigation();
   const navigate = useNavigate();
-  const { credits, setLastGreenestRoute } = useApp();
   const inputRef = useRef<HTMLInputElement>(null);
   const { credits, setLastGreenestRoute, setNavHidden } = useApp();
 
@@ -203,7 +202,7 @@ export const Home = () => {
                     </GlassButton>
                 </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Suggestions Dropdown / Pane */}
           <AnimatePresence>
@@ -254,7 +253,7 @@ export const Home = () => {
                   {suggestions.length === 0 && !isSearching && (
                     <div className="py-2">
                       {recentSearches.length > 0 && (
-                        <>
+                        <div className="recent-searches">
                           <p className="px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">Recent Searches</p>
                           {recentSearches.map((place, i) => (
                             <button
@@ -269,7 +268,7 @@ export const Home = () => {
                               </div>
                             </button>
                           ))}
-                        </>
+                        </div>
                       )}
 
                       <p className="px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 mt-2">Popular Nearby</p>
@@ -291,6 +290,7 @@ export const Home = () => {
                         </button>
                       ))}
                     </div>
+                  )}
                   </motion.div>
                 </GlassCard>
               </motion.div>
