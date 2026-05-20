@@ -65,7 +65,7 @@ export const GlassButton = ({
       whileTap={props.disabled ? undefined : { scale: 0.96 }}
       onClick={(e) => {
         if (isSuccess) return;
-        if (onClick) onClick(e as any);
+        if (onClick) onClick(e as unknown as React.MouseEvent<HTMLButtonElement>);
       }}
       layout
       {...props}
