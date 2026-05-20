@@ -22,6 +22,7 @@ const BottomNav = () => {
           return (
             <button
               key={path}
+              aria-current={active ? 'page' : undefined}
               onClick={() => navigate(path)}
               className={cn(
                 "flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition-all duration-200",
