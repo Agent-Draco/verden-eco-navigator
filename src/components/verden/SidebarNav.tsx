@@ -35,6 +35,7 @@ const SidebarNav = () => {
           return (
             <button
               key={path}
+              aria-current={active ? "page" : undefined}
               onClick={() => navigate(path)}
               className={cn(
                 "group relative flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-300",
