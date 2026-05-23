@@ -1,3 +1,4 @@
+import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Map, Leaf, Users, Wallet, User, Menu, BookOpen, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -36,6 +37,7 @@ const SidebarNav = () => {
             <button
               key={path}
               onClick={() => navigate(path)}
+              aria-current={active ? "page" : undefined}
               className={cn(
                 "group relative flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-300",
                 active 
