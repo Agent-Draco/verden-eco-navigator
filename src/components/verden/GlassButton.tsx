@@ -34,7 +34,7 @@ export const GlassButton = ({
     }
   }, [showSuccess, internalStatus, onSuccessComplete]);
 
-  const base = "font-display font-bold rounded-[24px] transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-95 relative overflow-hidden flex items-center justify-center";
+  const base = "font-display font-bold rounded-[24px] transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden flex items-center justify-center";
   
   const variants = {
     primary: "bg-gradient-green text-primary-foreground shadow-lg hover:shadow-primary/20",
@@ -55,6 +55,7 @@ export const GlassButton = ({
 
   return (
     <motion.button
+      {...props}
       className={cn(
         base, 
         variants[variant], 
@@ -62,13 +63,13 @@ export const GlassButton = ({
         isSuccess && "min-w-[48px] w-12 h-12 rounded-full p-0 px-0 py-0",
         className
       )}
-      whileTap={{ scale: 0.96 }}
+      disabled={props.disabled || isSuccess}
+      whileTap={props.disabled || isSuccess ? undefined : { scale: 0.96 }}
       onClick={(e) => {
         if (isSuccess) return;
         if (onClick) onClick(e as any);
       }}
       layout
-      {...props}
     >
       <AnimatePresence mode="wait">
         {isSuccess ? (
