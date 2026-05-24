@@ -1,4 +1,3 @@
-import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Map, Leaf, Users, Wallet, User, Menu, BookOpen, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
