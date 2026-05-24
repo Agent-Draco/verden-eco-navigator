@@ -1,0 +1,3 @@
+## 2024-05-25 - Improved Navigation Accessibility
+**Learning:** For interactive map-based applications where standard UI flows heavily rely on mouse/touch, navigation components (like BottomNav or SidebarNav) often lack critical keyboard focus and screen reader context. Using `aria-current="page"` dynamically on the active link and explicit `focus-visible` styling guarantees keyboard operability without disrupting the primary pointer-driven UX.
+**Action:** Consistently apply `aria-current` and standard `focus-visible:ring-2` to custom button-based navigation maps across internal React components.
