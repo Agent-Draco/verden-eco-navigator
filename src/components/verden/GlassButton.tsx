@@ -34,7 +34,7 @@ export const GlassButton = ({
     }
   }, [showSuccess, internalStatus, onSuccessComplete]);
 
-  const base = "font-display font-bold rounded-[24px] transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-95 relative overflow-hidden flex items-center justify-center";
+  const base = "font-display font-bold rounded-[24px] transition-all duration-500 relative overflow-hidden flex items-center justify-center";
   
   const variants = {
     primary: "bg-gradient-green text-primary-foreground shadow-lg hover:shadow-primary/20",
@@ -55,6 +55,7 @@ export const GlassButton = ({
 
   return (
     <motion.button
+      style={{ transitionTimingFunction: 'cubic-bezier(0.23, 1, 0.32, 1)' }}
       className={cn(
         base, 
         variants[variant], 
