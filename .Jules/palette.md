@@ -1,0 +1,4 @@
+## 2024-05-25 - Dynamic aria-current and keyboard focus on Navigation elements
+
+ **Learning:** When creating highly styled custom navigation items (especially mapped items), setting a dynamic `aria-current={active ? 'page' : undefined}` ensures screen readers get precise semantic context without introducing invalid ARIA states. Furthermore, relying entirely on hover states or custom animations can obscure keyboard interaction; explicitly defining `focus-visible` classes guarantees focus rings appear predictably for keyboard users without affecting mouse usability.
+ **Action:** Always ensure navigation elements (`<nav>` containers and button/link children) include explicit `aria-label` or `aria-current` attributes, and apply `focus-visible:ring-2` to custom interactive components to ensure basic keyboard accessibility.

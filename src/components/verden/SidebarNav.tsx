@@ -29,15 +29,16 @@ const SidebarNav = () => {
       </div>
 
       {/* Nav Items */}
-      <nav className="flex-1 flex flex-col gap-4 w-full px-2">
+      <nav className="flex-1 flex flex-col gap-4 w-full px-2" aria-label="Main Navigation">
         {navItems.map(({ icon: Icon, label, path }) => {
           const active = location.pathname === path;
           return (
             <button
               key={path}
               onClick={() => navigate(path)}
+              aria-current={active ? 'page' : undefined}
               className={cn(
-                "group relative flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-300",
+                "group relative flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                 active 
                   ? "bg-primary/10 text-primary shadow-[0_0_20px_rgba(34,197,94,0.15)]" 
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"

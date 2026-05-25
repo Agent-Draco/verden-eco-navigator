@@ -16,15 +16,16 @@ const BottomNav = () => {
 
   return (
     <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-[100] safe-bottom md:hidden">
-      <div className="glass-strong mx-4 mb-4 rounded-2xl px-1 py-3 flex justify-around items-center">
+      <nav className="glass-strong mx-4 mb-4 rounded-2xl px-1 py-3 flex justify-around items-center" aria-label="Mobile Navigation">
         {navItems.map(({ icon: Icon, label, path }) => {
           const active = location.pathname === path;
           return (
             <button
               key={path}
               onClick={() => navigate(path)}
+              aria-current={active ? 'page' : undefined}
               className={cn(
-                "flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition-all duration-200",
+                "flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                 active
                   ? "text-primary glow-green-sm"
                   : "text-muted-foreground hover:text-foreground"
@@ -35,7 +36,7 @@ const BottomNav = () => {
             </button>
           );
         })}
-      </div>
+      </nav>
     </div>
   );
 };
