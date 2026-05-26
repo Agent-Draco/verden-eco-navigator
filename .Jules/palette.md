@@ -1,0 +1,4 @@
+## 2024-05-26 - Navigation Accessibility Attributes
+
+**Learning:** When using `aria-current` to denote the active page in navigation links, it is important to conditionally render it as `undefined` when the link is inactive (e.g., `aria-current={active ? "page" : undefined}`). This ensures that inactive links do not have an invalid or misleading `aria-current="false"` attribute. Additionally, providing explicit `focus-visible:ring-2` styling on interactive navigation items greatly improves keyboard accessibility without negatively impacting mouse users.
+**Action:** Always apply `aria-current` conditionally rather than via boolean casting, and verify explicit `focus-visible` states exist for all main navigation elements.
