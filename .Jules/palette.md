@@ -1,0 +1,4 @@
+## 2024-05-26 - Navigation Accessibility Improvement
+
+**Learning:** Accessible navigation requires more than just visual focus indicators. It's important to provide `aria-label` for screen readers (especially on icon-only or visually ambiguous buttons) and dynamically update `aria-current="page"` on the active navigation link to accurately reflect the application's state to assistive technologies. Furthermore, using `focus-visible` instead of `focus` ensures that keyboard users receive clear focus rings without negatively impacting the visual experience for mouse users.
+**Action:** Always apply `aria-label`, conditional `aria-current`, and `focus-visible` utility classes when building or refactoring custom navigation components to guarantee robust keyboard and screen-reader accessibility.
