@@ -1,0 +1,4 @@
+## 2024-05-27 - Keyboard Navigation in Custom Navigation Components
+
+**Learning:** When using mapped React components or custom navigation designs (like `SidebarNav` or `BottomNav` composed of `<button>` elements), explicit ARIA states (`aria-current={active ? "page" : undefined}`) and keyboard focus visibility (`focus-visible:ring-2`) are crucial, as mouse-driven hover/active styles often obscure or omit keyboard focus indicators.
+**Action:** Always verify `focus-visible` outline implementations when customizing navigation elements, and ensure disabled/inactive states clear invalid ARIA attributes like `aria-current="false"` to be purely undefined when inactive.
