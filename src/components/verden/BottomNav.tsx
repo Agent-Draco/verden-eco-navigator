@@ -24,11 +24,12 @@ const BottomNav = () => {
               key={path}
               onClick={() => navigate(path)}
               className={cn(
-                "flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition-all duration-200",
+                "flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                 active
                   ? "text-primary glow-green-sm"
                   : "text-muted-foreground hover:text-foreground"
               )}
+              aria-current={active ? "page" : undefined}
             >
               <Icon size={20} strokeWidth={active ? 2.5 : 1.8} />
               <span className="text-[10px] font-medium">{label}</span>
