@@ -1,0 +1,3 @@
+## YYYY-MM-DD - [Improved Navigation Accessibility]
+**Learning:** Navigation buttons lacking `aria-current` and explicit keyboard focus styles degrade accessibility for screen reader and keyboard-only users. Applying `aria-current={active ? 'page' : undefined}` correctly announces active state, and custom `focus-visible` states ensure keyboard outlines without disrupting mouse users.
+**Action:** Ensure all active navigation elements dynamically receive `aria-current` and use explicit `focus-visible` classes (e.g. `focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background`) moving forward.
