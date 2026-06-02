@@ -38,8 +38,10 @@ export const Home = () => {
 
   const { location: userLocation, bearing: userHeading } = useGeoNavigation();
   const navigate = useNavigate();
-  const { credits, setLastGreenestRoute, setNavHidden } = useApp();
   const inputRef = useRef<HTMLInputElement>(null);
+  const { credits, setLastGreenestRoute, setNavHidden } = useApp();
+
+  // ── Sync Navbar Visibility ────────────────────────────────────────────────
   useEffect(() => {
     setNavHidden(isOverlayOpen);
   }, [isOverlayOpen, setNavHidden]);
@@ -151,7 +153,7 @@ export const Home = () => {
             <div className="glass rounded-full px-4 py-1.5 flex items-center gap-2 shadow-liquid transition-liquid hover:scale-105">
               <Leaf size={14} className="text-primary" />
               <span className="text-xs font-display font-bold text-foreground">{credits} credits</span>
-            </motion.div>
+            </div>
           </motion.div>
 
           {/* Search Input Pane */}
@@ -176,7 +178,7 @@ export const Home = () => {
                 className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground font-display font-medium text-lg leading-none"
               />
               {isSearching && (
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></motion.div>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
               )}
             </GlassCard>
 
@@ -187,7 +189,7 @@ export const Home = () => {
                     <GlassButton onClick={() => setTransportMode('bike')} variant={transportMode === 'bike' ? 'default' : 'glass'} size="icon" className="flex-1 h-12 text-xl rounded-[20px]">🏍️</GlassButton>
                     <GlassButton onClick={() => setTransportMode('cycle')} variant={transportMode === 'cycle' ? 'default' : 'glass'} size="icon" className="flex-1 h-12 text-foreground rounded-[20px]"><Bike size={20}/></GlassButton>
                     <GlassButton onClick={() => setTransportMode('public')} variant={transportMode === 'public' ? 'default' : 'glass'} size="icon" className="flex-1 h-12 text-foreground rounded-[20px]"><Bus size={20}/></GlassButton>
-                </motion.div>
+                </div>
                 
                 <div className="flex gap-2">
                     <GlassButton onClick={() => setRoutePreference('fast')} variant={routePreference === 'fast' ? 'default' : 'glass'} size="sm" className="flex-1 h-10 text-xs">
@@ -198,8 +200,8 @@ export const Home = () => {
                         <Leaf size={14} className="mr-1.5" />
                         Eco
                     </GlassButton>
-                </motion.div>
-            </motion.div>
+                </div>
+            </div>
           </motion.div>
 
           {/* Suggestions Dropdown / Pane */}
@@ -232,11 +234,11 @@ export const Home = () => {
                     >
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                         <MapPin size={18} className="text-primary" />
-                      </motion.div>
+                      </div>
                       <div className="text-left">
                         <p className="text-base font-bold text-foreground">{place.properties.name}</p>
                         <p className="text-xs text-muted-foreground line-clamp-1">{place.properties.city}{place.properties.state ? `, ${place.properties.state}` : ''}</p>
-                      </motion.div>
+                      </div>
                     </motion.button>
                   ))}
 
@@ -244,7 +246,7 @@ export const Home = () => {
                   {!isSearching && query.length >= 3 && suggestions.length === 0 && (
                     <div className="px-4 py-8 text-center">
                        <p className="text-sm text-muted-foreground italic">No matching results found</p>
-                    </motion.div>
+                    </div>
                   )}
 
                   {/* Default State: Recent & Popular */}
@@ -263,7 +265,7 @@ export const Home = () => {
                               <div className="text-left">
                                 <p className="text-sm text-foreground">{place.properties.name}</p>
                                 <p className="text-[10px] text-muted-foreground line-clamp-1">{place.properties.city}</p>
-                              </motion.div>
+                              </div>
                             </button>
                           ))}
                         </>
@@ -288,9 +290,10 @@ export const Home = () => {
                         </button>
                       ))}
                     </div>
+                  )}
                   </motion.div>
                 </GlassCard>
-              </div>
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
@@ -317,11 +320,11 @@ export const Home = () => {
                                 {opt.label}
                             </label>
                         ))}
-                    </motion.div>
+                    </div>
                 </GlassCard>
             </motion.div>
         )}
-      </motion.div>
+      </div>
 
       <AnimatePresence>
         {showRoutes && fastestRoute && greenestRoute && (
@@ -339,16 +342,16 @@ export const Home = () => {
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center shrink-0">
                   <Zap size={20} className="text-verden-electric" />
-                </motion.div>
+                </div>
                 <div className="flex-1">
                   <p className="font-display font-semibold text-foreground">Fastest Route</p>
                   <div className="flex gap-4 mt-1 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1"><Clock size={14} /> {fastestRoute.duration} min</span>
                     <span>{fastestRoute.distance} km</span>
                     <span>{fastestRoute.co2} kg CO₂</span>
-                  </motion.div>
-                </motion.div>
-              </motion.div>
+                  </div>
+                </div>
+              </div>
             </GlassCard>
 
             <GlassCard
@@ -359,16 +362,16 @@ export const Home = () => {
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-green flex items-center justify-center shrink-0">
                   <Leaf size={20} className="text-primary-foreground" />
-                </motion.div>
+                </div>
                 <div className="flex-1">
                   <p className="font-display font-semibold text-foreground">Greenest Route</p>
                   <div className="flex gap-4 mt-1 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1"><Clock size={14} /> {greenestRoute.duration} min</span>
                     <span>{greenestRoute.distance} km</span>
                     <span className="text-primary font-medium">{greenestRoute.co2} kg CO₂</span>
-                  </motion.div>
-                </motion.div>
-              </motion.div>
+                  </div>
+                </div>
+              </div>
               {co2Difference > 0 && (
                 <motion.div
                   className="mt-3 glass rounded-xl px-3 py-2 flex items-center gap-2"
@@ -383,6 +386,6 @@ export const Home = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 };
