@@ -1,0 +1,1 @@
+## 2024-03-24 - Accessibility improvements for navigation components\n\n**Learning:** Navigation components often miss keyboard accessibility indicators and screen-reader context for active states.\n**Action:** Always include `aria-current="page"` dynamically for active nav items and apply explicit `focus-visible` utility classes to support keyboard navigation.
