@@ -1,0 +1,4 @@
+## 2024-05-24 - Navigation Component Keyboard Accessibility
+
+**Learning:** Custom navigation components (like SidebarNav and BottomNav) often lack critical keyboard focus states (`focus-visible`) and screen reader context (`aria-current="page"`). Since these are interactive buttons rather than semantic `<a>` tags with `href`, they require explicit focus styling and ARIA attributes to be usable by keyboard and screen reader users.
+**Action:** Always verify that custom icon-based navigation buttons include `focus-visible` ring styling and conditionally apply `aria-current="page"` when the route is active.
