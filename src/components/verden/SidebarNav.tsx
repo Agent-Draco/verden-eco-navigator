@@ -37,11 +37,13 @@ const SidebarNav = () => {
               key={path}
               onClick={() => navigate(path)}
               className={cn(
-                "group relative flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-300",
+                "group relative flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                 active 
                   ? "bg-primary/10 text-primary shadow-[0_0_20px_rgba(34,197,94,0.15)]" 
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
+              aria-label={label}
+              aria-current={active ? 'page' : undefined}
             >
               <Icon size={24} strokeWidth={active ? 2.5 : 1.8} />
               
