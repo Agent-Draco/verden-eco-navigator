@@ -38,10 +38,8 @@ export const Home = () => {
 
   const { location: userLocation, bearing: userHeading } = useGeoNavigation();
   const navigate = useNavigate();
-  const { credits, setLastGreenestRoute } = useApp();
-  const inputRef = useRef<HTMLInputElement>(null);
   const { credits, setLastGreenestRoute, setNavHidden } = useApp();
-
+  const inputRef = useRef<HTMLInputElement>(null);
   // ── Sync Navbar Visibility ────────────────────────────────────────────────
   useEffect(() => {
     setNavHidden(isOverlayOpen);
@@ -203,7 +201,7 @@ export const Home = () => {
                     </GlassButton>
                 </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Suggestions Dropdown / Pane */}
           <AnimatePresence>
@@ -291,8 +289,7 @@ export const Home = () => {
                         </button>
                       ))}
                     </div>
-                  </motion.div>
-                </GlassCard>
+                                  </GlassCard>
               </motion.div>
             )}
           </AnimatePresence>
@@ -322,7 +319,7 @@ export const Home = () => {
                         ))}
                     </div>
                 </GlassCard>
-            </motion.div>
+            </div>
         )}
       </div>
 
@@ -380,10 +377,10 @@ export const Home = () => {
                 >
                   <Leaf size={14} className="text-primary" />
                   <span className="text-xs font-medium text-foreground">You save {co2Difference} kg CO₂ with this route</span>
-                </motion.div>
+                </div>
               )}
             </GlassCard>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>
