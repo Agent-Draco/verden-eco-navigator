@@ -38,7 +38,6 @@ export const Home = () => {
 
   const { location: userLocation, bearing: userHeading } = useGeoNavigation();
   const navigate = useNavigate();
-  const { credits, setLastGreenestRoute } = useApp();
   const inputRef = useRef<HTMLInputElement>(null);
   const { credits, setLastGreenestRoute, setNavHidden } = useApp();
 
@@ -203,7 +202,7 @@ export const Home = () => {
                     </GlassButton>
                 </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Suggestions Dropdown / Pane */}
           <AnimatePresence>
@@ -238,7 +237,7 @@ export const Home = () => {
                       </div>
                       <div className="text-left">
                         <p className="text-base font-bold text-foreground">{place.properties.name}</p>
-                        <p className="text-xs text-muted-foreground line-clamp-1">{place.properties.city}{place.properties.state ? `, ${place.properties.state}` : ''}</p>
+                        <p className="text-xs text-muted-foreground line-clamp-1">{place.properties.city}{place.properties.state ? ", " + place.properties.state : ""}</p>
                       </div>
                     </motion.button>
                   ))}
@@ -291,6 +290,7 @@ export const Home = () => {
                         </button>
                       ))}
                     </div>
+                  )}
                   </motion.div>
                 </GlassCard>
               </motion.div>
