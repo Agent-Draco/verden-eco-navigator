@@ -1,0 +1,3 @@
+## 2024-05-18 - Navigation Keyboard Accessibility & ARIA Current State
+**Learning:** Found that custom navigation buttons across the app lacked ARIA current state communication for screen readers and did not have explicit keyboard focus indicators, making it hard for keyboard/assistive tech users to determine active pages and tab position.
+**Action:** Always apply `aria-current={active ? 'page' : undefined}` and explicit `focus-visible:ring-2 focus-visible:ring-primary` styles to custom navigation links/buttons moving forward.
