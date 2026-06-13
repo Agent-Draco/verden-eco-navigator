@@ -1,0 +1,3 @@
+## 2024-05-24 - Accessible Navigation with ARIA and Focus Rings
+**Learning:** Navigation menus often rely solely on visual cues (like color changes or lines) to indicate the active page, which is inaccessible to screen readers. Furthermore, standard button resets can remove keyboard focus indicators, making tab-navigation difficult.
+**Action:** Always conditionally apply `aria-current="page"` to the active navigation link. Simultaneously, use explicit `focus-visible:ring` utility classes to guarantee keyboard focus states are clear without disrupting mouse click behavior.
