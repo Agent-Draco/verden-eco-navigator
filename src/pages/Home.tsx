@@ -38,7 +38,6 @@ export const Home = () => {
 
   const { location: userLocation, bearing: userHeading } = useGeoNavigation();
   const navigate = useNavigate();
-  const { credits, setLastGreenestRoute } = useApp();
   const inputRef = useRef<HTMLInputElement>(null);
   const { credits, setLastGreenestRoute, setNavHidden } = useApp();
 
@@ -203,7 +202,7 @@ export const Home = () => {
                     </GlassButton>
                 </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Suggestions Dropdown / Pane */}
           <AnimatePresence>
@@ -286,11 +285,12 @@ export const Home = () => {
                           <Zap size={14} className="text-verden-electric shrink-0" />
                           <div className="text-left">
                             <p className="text-sm text-foreground">{place.name}</p>
-                            <p className="text-[10px] text-muted-foreground">{place.city}, {place.state}</p>
+                            <p className="text-[10px] text-muted-foreground">{`${place.city}, ${place.state}`}</p>
                           </div>
                         </button>
                       ))}
                     </div>
+                  )}
                   </motion.div>
                 </GlassCard>
               </motion.div>
