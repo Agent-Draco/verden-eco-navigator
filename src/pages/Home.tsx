@@ -38,9 +38,8 @@ export const Home = () => {
 
   const { location: userLocation, bearing: userHeading } = useGeoNavigation();
   const navigate = useNavigate();
-  const { credits, setLastGreenestRoute } = useApp();
   const inputRef = useRef<HTMLInputElement>(null);
-  const { credits, setLastGreenestRoute, setNavHidden } = useApp();
+  const { credits, setLastGreenestRoute, setNavHidden, isOverlayOpen } = useApp();
 
   // ── Sync Navbar Visibility ────────────────────────────────────────────────
   useEffect(() => {
@@ -203,7 +202,7 @@ export const Home = () => {
                     </GlassButton>
                 </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Suggestions Dropdown / Pane */}
           <AnimatePresence>
@@ -253,25 +252,6 @@ export const Home = () => {
                   {/* Default State: Recent & Popular */}
                   {suggestions.length === 0 && !isSearching && (
                     <div className="py-2">
-                      {recentSearches.length > 0 && (
-                        <>
-                          <p className="px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">Recent Searches</p>
-                          {recentSearches.map((place, i) => (
-                            <button
-                              key={`recent-${i}`}
-                              onClick={() => handleSelect(place)}
-                              className="w-full flex items-center gap-3 px-4 py-2 hover:bg-muted/50 transition-colors"
-                            >
-                              <Clock size={14} className="text-muted-foreground shrink-0" />
-                              <div className="text-left">
-                                <p className="text-sm text-foreground">{place.properties.name}</p>
-                                <p className="text-[10px] text-muted-foreground line-clamp-1">{place.properties.city}</p>
-                              </div>
-                            </button>
-                          ))}
-                        </>
-                      )}
-
                       <p className="px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 mt-2">Popular Nearby</p>
                       {sortedPopularSuggestions.map((place, i) => (
                         <button
@@ -291,6 +271,7 @@ export const Home = () => {
                         </button>
                       ))}
                     </div>
+                  )}
                   </motion.div>
                 </GlassCard>
               </motion.div>
