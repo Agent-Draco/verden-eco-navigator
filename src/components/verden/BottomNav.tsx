@@ -24,7 +24,7 @@ const BottomNav = () => {
               key={path}
               onClick={() => navigate(path)}
               className={cn(
-                "flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition-all duration-200",
+                "flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                 active
                   ? "text-primary glow-green-sm"
                   : "text-muted-foreground hover:text-foreground"
