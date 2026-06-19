@@ -27,7 +27,8 @@ const BottomNav = () => {
                 "flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition-all duration-200",
                 active
                   ? "text-primary glow-green-sm"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               )}
             >
               <Icon size={20} strokeWidth={active ? 2.5 : 1.8} />
