@@ -38,7 +38,6 @@ export const Home = () => {
 
   const { location: userLocation, bearing: userHeading } = useGeoNavigation();
   const navigate = useNavigate();
-  const { credits, setLastGreenestRoute } = useApp();
   const inputRef = useRef<HTMLInputElement>(null);
   const { credits, setLastGreenestRoute, setNavHidden } = useApp();
 
@@ -203,7 +202,7 @@ export const Home = () => {
                     </GlassButton>
                 </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Suggestions Dropdown / Pane */}
           <AnimatePresence>
@@ -222,36 +221,37 @@ export const Home = () => {
                       visible: { transition: { staggerChildren: 0.05 } }
                     }}
                   >
-                  {/* Active Search Results */}
-                  {!isSearching && suggestions.length > 0 && suggestions.map((place, i) => (
-                    <motion.button
-                      key={`res-${i}`}
-                      variants={{
-                        hidden: { opacity: 0, x: -10 },
-                        visible: { opacity: 1, x: 0 }
-                      }}
-                      onClick={() => handleSelect(place)}
-                      className="w-full flex items-center gap-4 px-6 py-4 hover:bg-white/10 transition-colors border-b border-white/5 last:border-0"
-                    >
-                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                        <MapPin size={18} className="text-primary" />
-                      </div>
-                      <div className="text-left">
-                        <p className="text-base font-bold text-foreground">{place.properties.name}</p>
-                        <p className="text-xs text-muted-foreground line-clamp-1">{place.properties.city}{place.properties.state ? `, ${place.properties.state}` : ''}</p>
-                      </div>
-                    </motion.button>
-                  ))}
+                  <>
+                    {/* Active Search Results */}
+                    {!isSearching && suggestions.length > 0 && suggestions.map((place, i) => (
+                      <motion.button
+                        key={`res-${i}`}
+                        variants={{
+                          hidden: { opacity: 0, x: -10 },
+                          visible: { opacity: 1, x: 0 }
+                        }}
+                        onClick={() => handleSelect(place)}
+                        className="w-full flex items-center gap-4 px-6 py-4 hover:bg-white/10 transition-colors border-b border-white/5 last:border-0"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                          <MapPin size={18} className="text-primary" />
+                        </div>
+                        <div className="text-left">
+                          <p className="text-base font-bold text-foreground">{place.properties.name}</p>
+                          <p className="text-xs text-muted-foreground line-clamp-1">{place.properties.city}{place.properties.state ? `, ${place.properties.state}` : ''}</p>
+                        </div>
+                      </motion.button>
+                    ))}
 
-                  {/* No Results Fallback */}
-                  {!isSearching && query.length >= 3 && suggestions.length === 0 && (
-                    <div className="px-4 py-8 text-center">
-                       <p className="text-sm text-muted-foreground italic">No matching results found</p>
-                    </div>
-                  )}
+                    {/* No Results Fallback */}
+                    {!isSearching && query.length >= 3 && suggestions.length === 0 && (
+                      <div className="px-4 py-8 text-center">
+                         <p className="text-sm text-muted-foreground italic">No matching results found</p>
+                      </div>
+                    )}
 
-                  {/* Default State: Recent & Popular */}
-                  {suggestions.length === 0 && !isSearching && (
+                    {/* Default State: Recent & Popular */}
+                    {suggestions.length === 0 && !isSearching && (
                     <div className="py-2">
                       {recentSearches.length > 0 && (
                         <>
@@ -291,6 +291,8 @@ export const Home = () => {
                         </button>
                       ))}
                     </div>
+                    )}
+                  </>
                   </motion.div>
                 </GlassCard>
               </motion.div>
