@@ -38,9 +38,8 @@ export const Home = () => {
 
   const { location: userLocation, bearing: userHeading } = useGeoNavigation();
   const navigate = useNavigate();
-  const { credits, setLastGreenestRoute } = useApp();
-  const inputRef = useRef<HTMLInputElement>(null);
   const { credits, setLastGreenestRoute, setNavHidden } = useApp();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // ── Sync Navbar Visibility ────────────────────────────────────────────────
   useEffect(() => {
@@ -203,7 +202,7 @@ export const Home = () => {
                     </GlassButton>
                 </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Suggestions Dropdown / Pane */}
           <AnimatePresence>
@@ -222,6 +221,7 @@ export const Home = () => {
                       visible: { transition: { staggerChildren: 0.05 } }
                     }}
                   >
+                  <>
                   {/* Active Search Results */}
                   {!isSearching && suggestions.length > 0 && suggestions.map((place, i) => (
                     <motion.button
@@ -291,6 +291,8 @@ export const Home = () => {
                         </button>
                       ))}
                     </div>
+                  )}
+                  </>
                   </motion.div>
                 </GlassCard>
               </motion.div>
