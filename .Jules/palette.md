@@ -1,0 +1,3 @@
+## 2024-05-18 - Standardized Keyboard Accessibility for Navigational Elements
+**Learning:** Custom interactive elements like sidebar buttons, bottom nav icons, and tooltips often lack native focus states and semantic `aria-current` roles if they do not use a standard anchor tag.
+**Action:** Always ensure that custom navigational elements use semantic ARIA attributes (e.g. `aria-current="page"`) alongside tailwind utility focus ring classes (`focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`) to maintain screen-reader and keyboard accessibility consistency.
