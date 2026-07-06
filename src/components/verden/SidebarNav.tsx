@@ -21,7 +21,7 @@ const SidebarNav = () => {
       {/* Top Logo/Menu Area */}
       <div className="mb-8">
         <button 
-          className="p-3 rounded-2xl hover:bg-muted text-muted-foreground transition-colors"
+          className="p-3 rounded-2xl hover:bg-muted text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           aria-label="Toggle menu"
         >
           <Menu size={24} />
@@ -29,24 +29,26 @@ const SidebarNav = () => {
       </div>
 
       {/* Nav Items */}
-      <nav className="flex-1 flex flex-col gap-4 w-full px-2">
+      <nav className="flex-1 flex flex-col gap-4 w-full px-2" role="navigation" aria-label="Main Navigation">
         {navItems.map(({ icon: Icon, label, path }) => {
           const active = location.pathname === path;
           return (
             <button
               key={path}
               onClick={() => navigate(path)}
+              aria-label={label}
+              aria-current={active ? "page" : undefined}
               className={cn(
-                "group relative flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-300",
+                "group relative flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                 active 
                   ? "bg-primary/10 text-primary shadow-[0_0_20px_rgba(34,197,94,0.15)]" 
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
-              <Icon size={24} strokeWidth={active ? 2.5 : 1.8} />
+              <Icon size={24} strokeWidth={active ? 2.5 : 1.8} aria-hidden="true" />
               
               {/* Tooltip-like label */}
-              <span className="text-[10px] font-bold mt-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              <span className="text-[10px] font-bold mt-1 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity whitespace-nowrap">
                 {label}
               </span>
 
@@ -67,7 +69,7 @@ const SidebarNav = () => {
       <div className="mt-auto">
         <button 
           onClick={() => navigate('/customize')}
-          className="p-3 rounded-2xl text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          className="p-3 rounded-2xl text-muted-foreground hover:bg-muted hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           aria-label="Open settings"
         >
           <Settings size={22} />
