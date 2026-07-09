@@ -66,7 +66,12 @@ const Login = () => {
               onKeyDown={(e) => e.key === "Enter" && handleLogin()}
               className="flex-1 bg-transparent outline-none text-base text-foreground placeholder:text-muted-foreground"
             />
-            <button onClick={() => setShowPass(!showPass)} className="text-muted-foreground">
+            <button
+              type="button"
+              onClick={() => setShowPass(!showPass)}
+              className="text-muted-foreground p-1 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-colors hover:text-foreground"
+              aria-label={showPass ? "Hide password" : "Show password"}
+            >
               {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </GlassCard>
