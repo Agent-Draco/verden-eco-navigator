@@ -1,0 +1,4 @@
+## 2025-01-20 - Navigation Focus & Screen Reader Optimization
+
+**Learning:** Custom interactive navigation buttons lacking explicit `focus-visible` styles fail to provide keyboard accessibility indicators. Furthermore, tooltip labels mapped to `group-hover` must explicitly include `group-focus-visible` to ensure keyboard navigators can perceive them. Elements with explicit labels (e.g. `span` or `aria-label`) containing structural decorative icons can trigger redundant screen-reader announcements unless the icons themselves are marked with `aria-hidden="true"`.
+**Action:** Always enforce standard Tailwind ring states (`focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`) on custom interactive elements, ensure hover states pair logically with focus-visible equivalents, and safely hide purely decorative structural child components from a11y trees.
