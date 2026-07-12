@@ -1,0 +1,3 @@
+## 2025-02-12 - Interactive Navigation Accessibility Enhancements
+**Learning:** Decorative icons inside buttons with visible text or `aria-label`s can cause redundant screen reader announcements. Additionally, custom tooltip-like labels relying on `group-hover` must be paired with `group-focus-visible` to ensure keyboard users can access the same information as mouse users.
+**Action:** Consistently apply `aria-hidden="true"` to decorative icons within labeled interactive elements, and pair `group-hover` with `group-focus-visible` while adding standard `focus-visible` outline classes (`focus-visible:outline-none focus-visible:ring-2...`) to interactive parent elements.
