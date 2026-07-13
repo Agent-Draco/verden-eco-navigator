@@ -71,6 +71,7 @@ const Resources = () => {
       <div className="w-full max-w-2xl">
         <header className="flex items-center gap-4 mb-10">
           <GlassButton 
+            aria-label="Go Back"
             variant="glass" 
             size="icon" 
             onClick={() => navigate(-1)}
