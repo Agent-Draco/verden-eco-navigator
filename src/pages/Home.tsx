@@ -40,7 +40,6 @@ export const Home = () => {
   const navigate = useNavigate();
   const { credits, setLastGreenestRoute } = useApp();
   const inputRef = useRef<HTMLInputElement>(null);
-  const { credits, setLastGreenestRoute, setNavHidden } = useApp();
 
   // ── Sync Navbar Visibility ────────────────────────────────────────────────
   useEffect(() => {
@@ -203,7 +202,7 @@ export const Home = () => {
                     </GlassButton>
                 </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Suggestions Dropdown / Pane */}
           <AnimatePresence>
@@ -291,6 +290,7 @@ export const Home = () => {
                         </button>
                       ))}
                     </div>
+                  )}
                   </motion.div>
                 </GlassCard>
               </motion.div>
