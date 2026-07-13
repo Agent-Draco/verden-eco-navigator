@@ -38,6 +38,7 @@ export const Home = () => {
 
   const { location: userLocation, bearing: userHeading } = useGeoNavigation();
   const navigate = useNavigate();
+  const { credits, setLastGreenestRoute } = useApp();
   const inputRef = useRef<HTMLInputElement>(null);
   const { credits, setLastGreenestRoute, setNavHidden } = useApp();
 
@@ -100,7 +101,7 @@ export const Home = () => {
     if (userLocation) {
       const userCoords: [number, number] = [userLocation[1], userLocation[0]];
       const destCoords: [number, number] = place.geometry.coordinates;
-      
+
       const routes = await getRoute(userCoords, destCoords);
       if (!routes || routes.length === 0) return;
 
@@ -122,13 +123,13 @@ export const Home = () => {
     setLastGreenestRoute(route, isGreenest);
     navigate("/navigation", { state: { route, destination: selectedDest } });
   };
-  
+
   const co2Difference = fastestRoute && greenestRoute ? parseFloat((fastestRoute.co2 - greenestRoute.co2).toFixed(1)) : 0;
 
   return (
     <div className="w-full h-full relative overflow-hidden bg-topographic">
       {/* Background Map */}
-      <Map 
+      <Map
         userLocation={userLocation}
         userHeading={userHeading}
         bearing={userHeading}
@@ -136,15 +137,15 @@ export const Home = () => {
         fastestRoute={fastestRoute}
         greenestRoute={greenestRoute}
       />
-      
+
       {/* Search and Navigation Overlay */}
       <div className="absolute inset-0 z-10 pointer-events-none flex flex-col md:flex-row md:items-start md:p-6 p-4 pt-6 gap-4 overflow-hidden">
-        
+
         {/* Main Search Panel */}
         <div className="w-full md:w-[380px] pointer-events-auto flex flex-col gap-4 max-h-full">
-          
+
           {/* Top Bar (Logo & Credits) */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             className="flex items-center justify-between mb-0"
@@ -157,7 +158,7 @@ export const Home = () => {
           </motion.div>
 
           {/* Search Input Pane */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="space-y-3"
@@ -190,7 +191,7 @@ export const Home = () => {
                     <GlassButton onClick={() => setTransportMode('cycle')} variant={transportMode === 'cycle' ? 'default' : 'glass'} size="icon" className="flex-1 h-12 text-foreground rounded-[20px]"><Bike size={20}/></GlassButton>
                     <GlassButton onClick={() => setTransportMode('public')} variant={transportMode === 'public' ? 'default' : 'glass'} size="icon" className="flex-1 h-12 text-foreground rounded-[20px]"><Bus size={20}/></GlassButton>
                 </div>
-                
+
                 <div className="flex gap-2">
                     <GlassButton onClick={() => setRoutePreference('fast')} variant={routePreference === 'fast' ? 'default' : 'glass'} size="sm" className="flex-1 h-10 text-xs">
                         <Zap size={14} className="mr-1.5" />
@@ -297,7 +298,7 @@ export const Home = () => {
             )}
           </AnimatePresence>
         </div>
-        
+
         {/* Additional Desktop Panels */}
         {transportMode === 'public' && (
             <motion.div initial={{opacity: 0, x: -20}} animate={{opacity: 1, x: 0}} className="w-full md:w-[280px] pointer-events-auto">
@@ -311,12 +312,12 @@ export const Home = () => {
                             { id: 'cycle', label: 'Cycle' }
                         ].map(opt => (
                             <label key={opt.id} className="flex items-center gap-2 p-2 rounded-lg bg-secondary/50 border border-border/50 cursor-pointer hover:bg-secondary transition-colors">
-                                <input 
-                                    type="checkbox" 
-                                    checked={publicTransportOptions[opt.id as keyof typeof publicTransportOptions]} 
-                                    onChange={e => setPublicTransportOptions({...publicTransportOptions, [opt.id]: e.target.checked})} 
+                                <input
+                                    type="checkbox"
+                                    checked={publicTransportOptions[opt.id as keyof typeof publicTransportOptions]}
+                                    onChange={e => setPublicTransportOptions({...publicTransportOptions, [opt.id]: e.target.checked})}
                                     className="accent-primary"
-                                /> 
+                                />
                                 {opt.label}
                             </label>
                         ))}

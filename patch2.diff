@@ -1,0 +1,8 @@
+--- src/pages/Home.tsx
++++ src/pages/Home.tsx
+@@ -40,7 +40,6 @@
+   const { location: userLocation, bearing: userHeading } = useGeoNavigation();
+   const navigate = useNavigate();
+-  const { credits, setLastGreenestRoute } = useApp();
+   const inputRef = useRef<HTMLInputElement>(null);
+   const { credits, setLastGreenestRoute, setNavHidden } = useApp();
