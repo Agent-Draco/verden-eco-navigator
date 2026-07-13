@@ -1,0 +1,8 @@
+## 2024-03-24 - Accessibility on navigation items
+
+**Learning:** When using tooltip-like text for primarily icon-based navigation bars, it is essential to have `aria-label`s on the button elements and hide the icons (`aria-hidden="true"`) to prevent redundant or confusing screen reader announcements. Additionally, using `group-focus-visible:opacity-100` alongside standard hover styles ensures the "tooltip" text appears during keyboard navigation.
+**Action:** Ensure all future custom navigation elements or icon-buttons get proper focus states (`focus-visible:outline-none focus-visible:ring-2 ...`), have their inner decorative elements hidden from screen readers, and that visually hidden/tooltip text is revealed correctly upon keyboard focus.
+## 2024-03-24 - Build/Test dependencies & Tailwind arbitrary values
+
+**Learning:** When debugging GitHub CI failures after submitting a PR, standard build processes can reveal syntax errors (like duplicate const declarations or mismatched JSX tags) or unresolved imports that might have been pushed inadvertently. Additionally, arbitrary CSS values inside Tailwind `apply` directives, like `ease-[cubic-bezier(0.23,1,0.32,1)]`, can cause "ambiguous class" or missing class errors in production builds.
+**Action:** Always run local project build and test commands (like `npx tsc --noEmit && npx vite build && npx vitest run`) before submitting PRs to prevent introducing or missing regression errors. Fix complex CSS transitions by splitting the Tailwind directive (`@apply transition-all`) and using standard CSS (`transition-timing-function: cubic-bezier(...)`).
