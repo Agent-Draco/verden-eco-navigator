@@ -75,6 +75,7 @@ const Resources = () => {
             size="icon" 
             onClick={() => navigate(-1)}
             className="rounded-xl shadow-lg border-white/10"
+            aria-label="Go back"
           >
             <ArrowLeft size={20} />
           </GlassButton>
