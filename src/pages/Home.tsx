@@ -38,9 +38,8 @@ export const Home = () => {
 
   const { location: userLocation, bearing: userHeading } = useGeoNavigation();
   const navigate = useNavigate();
-  const { credits, setLastGreenestRoute } = useApp();
-  const inputRef = useRef<HTMLInputElement>(null);
   const { credits, setLastGreenestRoute, setNavHidden } = useApp();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // ── Sync Navbar Visibility ────────────────────────────────────────────────
   useEffect(() => {
@@ -186,10 +185,10 @@ export const Home = () => {
             {/* Transport & Mode Controls */}
             <div className="flex flex-col gap-3">
                 <div className="flex justify-around bg-white/5 backdrop-blur-xl rounded-[24px] p-1 gap-1 border border-white/10 shadow-liquid">
-                    <GlassButton onClick={() => setTransportMode('car')} variant={transportMode === 'car' ? 'default' : 'glass'} size="icon" className="flex-1 h-12 text-foreground rounded-[20px]"><Car size={20}/></GlassButton>
-                    <GlassButton onClick={() => setTransportMode('bike')} variant={transportMode === 'bike' ? 'default' : 'glass'} size="icon" className="flex-1 h-12 text-xl rounded-[20px]">🏍️</GlassButton>
-                    <GlassButton onClick={() => setTransportMode('cycle')} variant={transportMode === 'cycle' ? 'default' : 'glass'} size="icon" className="flex-1 h-12 text-foreground rounded-[20px]"><Bike size={20}/></GlassButton>
-                    <GlassButton onClick={() => setTransportMode('public')} variant={transportMode === 'public' ? 'default' : 'glass'} size="icon" className="flex-1 h-12 text-foreground rounded-[20px]"><Bus size={20}/></GlassButton>
+                    <GlassButton onClick={() => setTransportMode('car')} variant={transportMode === 'car' ? 'default' : 'glass'} size="icon" aria-label="Car" className="flex-1 h-12 text-foreground rounded-[20px]"><Car size={20}/></GlassButton>
+                    <GlassButton onClick={() => setTransportMode('bike')} variant={transportMode === 'bike' ? 'default' : 'glass'} size="icon" aria-label="Bike" className="flex-1 h-12 text-xl rounded-[20px]">🏍️</GlassButton>
+                    <GlassButton onClick={() => setTransportMode('cycle')} variant={transportMode === 'cycle' ? 'default' : 'glass'} size="icon" aria-label="Cycle" className="flex-1 h-12 text-foreground rounded-[20px]"><Bike size={20}/></GlassButton>
+                    <GlassButton onClick={() => setTransportMode('public')} variant={transportMode === 'public' ? 'default' : 'glass'} size="icon" aria-label="Public Transport" className="flex-1 h-12 text-foreground rounded-[20px]"><Bus size={20}/></GlassButton>
                 </div>
                 
                 <div className="flex gap-2">
@@ -203,7 +202,7 @@ export const Home = () => {
                     </GlassButton>
                 </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Suggestions Dropdown / Pane */}
           <AnimatePresence>
@@ -291,6 +290,7 @@ export const Home = () => {
                         </button>
                       ))}
                     </div>
+                  )}
                   </motion.div>
                 </GlassCard>
               </motion.div>
