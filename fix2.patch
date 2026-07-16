@@ -1,0 +1,20 @@
+--- src/pages/Home.tsx
++++ src/pages/Home.tsx
+@@ -201,6 +201,8 @@
+                         <Leaf size={14} className="mr-1.5" />
+                         Eco
+                     </GlassButton>
+                 </div>
++            </div>
++          </motion.div>
+
+           {/* Suggestions Dropdown / Pane */}
+           <AnimatePresence>
+@@ -291,6 +293,7 @@
+                         </button>
+                       ))}
+                     </div>
++                  </motion.div>
+                 </GlassCard>
+               </motion.div>
+             )}

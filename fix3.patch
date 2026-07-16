@@ -1,0 +1,12 @@
+--- src/pages/Home.tsx
++++ src/pages/Home.tsx
+@@ -292,8 +292,9 @@
+                         </button>
+                       ))}
+                     </div>
+-                  </motion.div>
++                  )}
++                </motion.div>
+                 </GlassCard>
+               </motion.div>
+             )}
