@@ -1,0 +1,11 @@
+--- src/pages/Navigation.tsx
++++ src/pages/Navigation.tsx
+@@ -2,7 +2,7 @@
+ import { useNavigate } from 'react-router-dom';
+ import { motion, AnimatePresence } from 'framer-motion';
+ import { ArrowLeft, Flag, Clock, Navigation2, AlertCircle, MapPin, ChevronRight, Share2, Printer } from 'lucide-react';
+-import GlassButton from '@/components/verden/GlassButton';
+-import GlassCard from '@/components/verden/GlassCard';
++import { GlassButton } from '@/components/verden/GlassButton';
++import { GlassCard } from '@/components/verden/GlassCard';
+ import Map from '@/components/verden/Map';

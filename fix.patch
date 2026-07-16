@@ -1,0 +1,28 @@
+--- src/pages/Home.tsx
++++ src/pages/Home.tsx
+@@ -40,7 +40,7 @@
+   const { location: userLocation, bearing: userHeading } = useGeoNavigation();
+   const navigate = useNavigate();
+   const { credits, setLastGreenestRoute } = useApp();
+   const inputRef = useRef<HTMLInputElement>(null);
+-  const { credits, setLastGreenestRoute, setNavHidden } = useApp();
++  const { setNavHidden } = useApp();
+
+   // ── Sync Navbar Visibility ────────────────────────────────────────────────
+@@ -201,8 +201,6 @@
+                         <Leaf size={14} className="mr-1.5" />
+                         Eco
+                     </GlassButton>
+                 </div>
+-            </div>
+-          </div>
+
+           {/* Suggestions Dropdown / Pane */}
+@@ -291,7 +289,6 @@
+                         </button>
+                       ))}
+                     </div>
+-                  </motion.div>
+                 </GlassCard>
+               </motion.div>
+             )}
