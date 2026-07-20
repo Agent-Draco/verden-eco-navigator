@@ -66,8 +66,13 @@ const Login = () => {
               onKeyDown={(e) => e.key === "Enter" && handleLogin()}
               className="flex-1 bg-transparent outline-none text-base text-foreground placeholder:text-muted-foreground"
             />
-            <button onClick={() => setShowPass(!showPass)} className="text-muted-foreground">
-              {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+            <button
+              type="button"
+              onClick={() => setShowPass(!showPass)}
+              className="text-muted-foreground"
+              aria-label={showPass ? "Hide password" : "Show password"}
+            >
+              {showPass ? <EyeOff size={16} aria-hidden="true" /> : <Eye size={16} aria-hidden="true" />}
             </button>
           </GlassCard>
 
