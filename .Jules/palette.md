@@ -1,0 +1,3 @@
+## 2025-03-01 - Add Focus States and ARIA attributes to Sidebar Navigation
+**Learning:** Found missing keyboard focus-visible outlines on sidebar buttons, tooltips not showing for keyboard users, lack of active link indicator `aria-current`, and missing `aria-hidden` attributes on decorative icons.
+**Action:** Always ensure that interactive elements have clear focus indicators using `focus-visible`, that visually hidden tooltips are shown on focus, and that current active pages are marked semantically with `aria-current`. Decorative icons inside labeled buttons should have `aria-hidden="true"`.
