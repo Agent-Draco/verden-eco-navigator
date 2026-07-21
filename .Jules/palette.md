@@ -1,0 +1,3 @@
+## 2024-07-21 - Improve SidebarNav Accessibility
+**Learning:** Adding aria-current attributes to active links, aria-hidden to decorative icons within buttons that have visible text/aria-labels, and explicit focus-visible states significantly enhances screen reader usability and keyboard navigation without breaking the visual aesthetic. Coupling group-focus-visible with group-hover ensures tooltips appear for keyboard users too.
+**Action:** Always add aria-current="page" to active navigational items, aria-hidden to decorative visual icons, and ensure focus-visible states exist on interactive elements, alongside group-focus-visible for tooltip patterns.
