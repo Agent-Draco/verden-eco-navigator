@@ -1,0 +1,3 @@
+## 2024-07-21 - Navigation Accessibility Improvements
+**Learning:** Navigation sidebars often rely solely on visual cues (hover states, colored active states) but miss essential keyboard focus states, active states for screen readers (\`aria-current="page"\`), and tooltip visibility for keyboard users.
+**Action:** Added explicit \`focus-visible\` styles, \`aria-current="page"\`, \`aria-hidden="true"\` to decorative icons, and paired \`group-hover:opacity-100\` with \`group-focus-visible:opacity-100\` in \`SidebarNav.tsx\` to ensure comprehensive accessibility for keyboard and screen reader users.
